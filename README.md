@@ -1,5 +1,7 @@
 # CIS 566 Project 1: Noisy Planets
 
+Haowei Li
+
 ## Objective
 - Continue practicing WebGL and Typescript
 - Experiment with noise functions to procedurally generate the surface of a planet
