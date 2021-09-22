@@ -99,6 +99,46 @@ float perlin(vec3 P){
   return 2.2f * n_xyz;
 }
 
+//toolbox functions
+float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
+vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
+vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
+
+float noise(vec3 p){
+    vec3 a = floor(p);
+    vec3 d = p - a;
+    d = d * d * (3.0 - 2.0 * d);
+
+    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
+    vec4 k1 = perm(b.xyxy);
+    vec4 k2 = perm(k1.xyxy + b.zzww);
+
+    vec4 c = k2 + a.zzzz;
+    vec4 k3 = perm(c);
+    vec4 k4 = perm(c + 1.0);
+
+    vec4 o1 = fract(k3 * (1.0 / 41.0));
+    vec4 o2 = fract(k4 * (1.0 / 41.0));
+
+    vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
+    vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
+
+    return o4.y * d.y + o4.x * (1.0 - d.y);
+}
+
+#define NUM_OCTAVES 5
+float fbm(vec3 x) {
+	float v = 0.0;
+	float a = 0.9; //0.5
+	vec3 shift = vec3(100);
+	for (int i = 0; i < NUM_OCTAVES; ++i) {
+		v += a * noise(x);
+		x = x * 2.25 + shift; //2.0
+		a *= 0.55; //0.5
+	}
+	return v;
+}
+
 void main()
 {
     // Material base color (before shading)
@@ -107,7 +147,7 @@ void main()
         // Calculate the diffuse term for Lambert shading
         float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
         // Avoid negative lighting values
-        diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);
+        // diffuseTerm = clamp(diffuseTerm, 0, 1);
 
         float ambientTerm = 0.2;
 
@@ -117,28 +157,24 @@ void main()
 
         // Compute final shaded color
         out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
-        float time = float(u_Time);
-        // vec4 pct = fs_Pos;
-        
-        
-            //achieve a interesting color palette by not normalizing light vec
-        float t = dot(normalize(fs_Nor), fs_LightVec);
-        float t2 = dot(normalize(fs_Nor), normalize(fs_LightVec));
 
-        vec3 a = vec3(1.8, 0.5, 0.5);
-        vec3 b = vec3(0.5, 0.5, 0.5);
-        vec3 c = vec3(1.f, 0.5, 1.f);
-        vec3 c2 = vec3(1.f, 2, 1.f);
-        vec3 d = vec3(0.f, 1.38, 0.67);
 
-        vec3 col = vec3(perlin(fs_Pos.xyz),perlin(fs_Pos.yzw),perlin(fs_Pos.zwx)) ;
-        // vec3 col = vec3(perlin(fs_Pos.xyz));
-        vec4 new_col = vec4(col.xyz, 1.f) + vec4(0.5, 0.5, 0.5,1);
-        vec3 col2 = vec3(a + b * cos(2.f * 3.14159f * (c2 * t2 + d)));
-        vec4 new_col2 = vec4(col2.xyz, 1.f);
+        //begin tinkering
+      vec3 noiseInput = fs_Pos.xyz;
+      noiseInput *= 1.0f;
 
-        float pct = abs(cos(time*0.02f));
-        float pct2 = abs(sin(time*0.01f));
+      float noise = fbm(noiseInput);
 
-        out_Col = mix(out_Col, new_col+new_col2*0.1, pct);
+      vec3 surfaceColor = vec3(noise);
+
+      if (noise > 0.5){
+        surfaceColor = vec3(255.0,255.0,255.0);
+      } else {
+        surfaceColor = vec3(0,0,0);
+      }
+
+      out_Col = vec4(surfaceColor.xyz, 1.0);
+
+
+
 }

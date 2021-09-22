@@ -46,14 +46,10 @@ void main()
                                                             // model matrix. This is necessary to ensure the normals remain
                                                             // perpendicular to the surface after the surface is transformed by
                                                             // the model matrix.
-    fs_Pos = vs_Pos;
 
-    float time = float(u_Time);
-    vec4 timeMult = vec4(clamp(2.f*cos(time/10.f), 0.3f, 3.f),clamp(2.f*sin(time/15.f), 0.3f, 2.f),cos(time/30.f),1.f);
 
-    vec4 modelposition = u_Model * vs_Pos;// + timeMult;   // Temporarily store the transformed vertex positions for use below
+    vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
 
-    // modelposition.y = modelposition.y * (sin(time*0.01)*2.f-1.f);
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
 
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is

@@ -97,15 +97,18 @@ void main()
     //new code                        
     float fbm_noise = fbm(pos.xyz);  
     float warp_noise = fbm(pos.xyz + fbm( pos.xyz + fbm( pos.xyz )));
-    float threshold = 1.0;
+    float threshold = 0.75;
     float mult = float(u_Height) * 0.1;
  
-    warp_noise *= mult;
-    pos += fs_Nor * warp_noise;  
+    if(warp_noise > threshold){
+    pos += fs_Nor * warp_noise * mult;  
+    } else {
+    pos += fs_Nor * threshold * mult;      
+    }
     fs_Nor.xyz *= warp_noise;
     // fs_Nor.xyz = vec3(f(pos.xyz + warp_noise) - f(pos.xyz - warp_noise), f(pos.xyz + warp_noise) - f(pos.xyz - warp_noise), f(pos.xyz + warp_noise) - f(pos.xyz - warp_noise));
     
-    fs_noise = warp_noise/mult;                
+    fs_noise = warp_noise;                
 
     //plug into model position                                            
     vec4 modelposition = u_Model * pos;  // Temporarily store the transformed vertex positions for use below

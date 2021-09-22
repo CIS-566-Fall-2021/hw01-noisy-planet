@@ -9,6 +9,10 @@ import Camera from './Camera';
 import { setGL } from './globals';
 import ShaderProgram, { Shader } from './rendering/gl/ShaderProgram';
 
+const LAMBERT = 0;
+const BLINN = 1;
+const MATCAP = 2;
+
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
@@ -18,7 +22,8 @@ const controls = {
   speed: 0,
   height: 5,
   octaves: 4,
-  snow: 0,
+  light: 0,
+  shading_model: LAMBERT,
 };
 
 let icosphere: Icosphere;
@@ -54,7 +59,8 @@ function main() {
   gui.add(controls, 'speed', 0, 10).step(0.1);
   gui.add(controls, 'height', 1, 15).step(1);
   gui.add(controls, 'octaves', 3, 10).step(1);
-  gui.add(controls, 'snow', 0.1, 100).step(0.1);
+  gui.add(controls, 'light', -100, 100).step(0.1);
+  gui.add(controls, 'shading_model', 0, 2).step(1);
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement>document.getElementById('canvas');
@@ -114,7 +120,7 @@ function main() {
       time * controls.speed,
       controls.height,
       controls.octaves,
-      controls.snow
+      controls.light
     );
     stats.end();
 
