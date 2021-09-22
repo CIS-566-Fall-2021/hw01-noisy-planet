@@ -15,7 +15,8 @@ const controls = {
   tesselations: 6,
   'Load Scene': loadScene, // A function pointer, essentially
   color: [113, 188, 255, 1],
-  speed: 1,
+  speed: 0,
+  height: 5,
 };
 
 let icosphere: Icosphere;
@@ -48,7 +49,8 @@ function main() {
   gui.add(controls, 'tesselations', 0, 8).step(1);
   gui.add(controls, 'Load Scene');
   gui.addColor(controls, 'color');
-  gui.add(controls, 'speed', 0, 3).step(0.1);
+  gui.add(controls, 'speed', 0, 10).step(0.1);
+  gui.add(controls, 'height', 1, 15).step(1);
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement>document.getElementById('canvas');
@@ -105,7 +107,8 @@ function main() {
         // cube,
       ],
       vec4.fromValues(controls.color[0] / 255.0, controls.color[1] / 255.0, controls.color[2] / 255.0, 1),
-      time * controls.speed
+      time * controls.speed,
+      controls.height
     );
     stats.end();
 
