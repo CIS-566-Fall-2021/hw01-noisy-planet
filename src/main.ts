@@ -71,18 +71,18 @@ function main() {
     gl.enable(gl.DEPTH_TEST);
 
   const lambert = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
+    new Shader(gl.VERTEX_SHADER, require('./shaders/earth-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/earth-frag.glsl')),
   ]);
 
   const lambertDeform = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/deform-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
+    new Shader(gl.VERTEX_SHADER, require('./shaders/canyons-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/canyons-frag.glsl')),
   ]);
 
   const noise = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/noise-frag.glsl')),
+    new Shader(gl.VERTEX_SHADER, require('./shaders/mountains-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/mountains-frag.glsl')),
   ]);
 
   const noiseDeform = new ShaderProgram([
@@ -134,9 +134,9 @@ function main() {
                               controls.Color[1] / 255,
                               controls.Color[2] / 255, 1);
     renderer.render(camera, currShader, [
-      //icosphere,
+      icosphere,
       //square,
-      cube
+      //cube
     ], col, time);
       stats.end();
       time++;
