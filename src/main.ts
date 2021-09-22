@@ -17,6 +17,8 @@ const controls = {
   color: [113, 188, 255, 1],
   speed: 0,
   height: 5,
+  octaves: 4,
+  snow: 0,
 };
 
 let icosphere: Icosphere;
@@ -51,6 +53,8 @@ function main() {
   gui.addColor(controls, 'color');
   gui.add(controls, 'speed', 0, 10).step(0.1);
   gui.add(controls, 'height', 1, 15).step(1);
+  gui.add(controls, 'octaves', 3, 10).step(1);
+  gui.add(controls, 'snow', 0.1, 100).step(0.1);
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement>document.getElementById('canvas');
@@ -108,7 +112,9 @@ function main() {
       ],
       vec4.fromValues(controls.color[0] / 255.0, controls.color[1] / 255.0, controls.color[2] / 255.0, 1),
       time * controls.speed,
-      controls.height
+      controls.height,
+      controls.octaves,
+      controls.snow
     );
     stats.end();
 

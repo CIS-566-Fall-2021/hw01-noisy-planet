@@ -31,6 +31,8 @@ class ShaderProgram {
   unifColor: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
   unifHeight: WebGLUniformLocation;
+  unifShift: WebGLUniformLocation;
+  unifSnow: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -53,6 +55,8 @@ class ShaderProgram {
     this.unifColor = gl.getUniformLocation(this.prog, 'u_Color');
     this.unifTime = gl.getUniformLocation(this.prog, 'u_Time');
     this.unifHeight = gl.getUniformLocation(this.prog, 'u_Height');
+    this.unifShift = gl.getUniformLocation(this.prog, 'u_Shift');
+    this.unifSnow = gl.getUniformLocation(this.prog, 'u_Snow');
   }
 
   use() {
@@ -101,6 +105,20 @@ class ShaderProgram {
     this.use();
     if (this.unifHeight !== -1) {
       gl.uniform1i(this.unifHeight, h);
+    }
+  }
+
+  setShift(h: number) {
+    this.use();
+    if (this.unifShift !== -1) {
+      gl.uniform1i(this.unifShift, h);
+    }
+  }
+
+  setSnow(h: number) {
+    this.use();
+    if (this.unifSnow !== -1) {
+      gl.uniform1i(this.unifSnow, h);
     }
   }
 

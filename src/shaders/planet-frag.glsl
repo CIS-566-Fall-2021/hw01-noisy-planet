@@ -13,6 +13,7 @@ precision highp float;
 
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 uniform highp int u_Time; //bug after added
+uniform int u_ShadingModel;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -20,6 +21,7 @@ in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
 in vec4 fs_Pos;  
+
 
 in float fs_noise;
 
@@ -84,20 +86,31 @@ void main()
           diffuseColor = iceCol;
         }
 
-                // Calculate the diffuse term for Lambert shading
+        // Calculate the diffuse term for different shading
         float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
         // Avoid negative lighting values
         diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);
-
         float ambientTerm = 0.2;
+        float lightIntensity = diffuseTerm + ambientTerm;
 
-        float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier
-                                                            //to simulate ambient lighting. This ensures that faces that are not
-                                                            //lit by our point light are not completely black.
-        // Compute final shaded color
+        //blinn
+        // if(u_ShadingModel == 1){
+        //   //average of view vector and light vector
+          vec4 fs_CameraPos = vec4(3.0);
+          vec4 H = (fs_LightVec + fs_CameraPos) / 2.f;
+          float exp = 100.f;
+
+          // Material base color (before shading)
+          diffuseColor += max(pow(dot(normalize(H), normalize(fs_Nor)), exp), 0.0);
+
+        // //matcap
+        // } else if (u_ShadingModel == 2.0){
+
+        // } else {
+      
+        // }
+        // u_ShadingModel = 1;
         out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
-
-
-        // out_Col = mix(out_Col, new_col+new_col2*0.1, pct);
+        
         
 }

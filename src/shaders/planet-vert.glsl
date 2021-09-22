@@ -21,6 +21,8 @@ uniform mat4 u_ViewProj;    // The matrix that defines the camera's transformati
 precision highp float;
 uniform highp int u_Time;
 uniform highp int u_Height;
+uniform highp int u_Shift;
+uniform highp int u_Snow;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
@@ -66,7 +68,7 @@ float noise(vec3 p){
     return o4.y * d.y + o4.x * (1.0 - d.y);
 }
 
-#define NUM_OCTAVES 4
+#define NUM_OCTAVES u_Shift
 float fbm(vec3 x) {
     float time = float(u_Time);
 	float v = 0.0;
@@ -80,6 +82,9 @@ float fbm(vec3 x) {
 	return v;
 }
 
+float f(vec3 pos){
+    return fbm(pos.xyz + fbm( pos.xyz + fbm( pos.xyz )));
+}
 void main()
 {
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
@@ -97,13 +102,14 @@ void main()
  
     warp_noise *= mult;
     pos += fs_Nor * warp_noise;  
-    fs_Nor *= warp_noise;
+    fs_Nor.xyz *= warp_noise;
+    // fs_Nor.xyz = vec3(f(pos.xyz + warp_noise) - f(pos.xyz - warp_noise), f(pos.xyz + warp_noise) - f(pos.xyz - warp_noise), f(pos.xyz + warp_noise) - f(pos.xyz - warp_noise));
     
     fs_noise = warp_noise/mult;                
 
     //plug into model position                                            
     vec4 modelposition = u_Model * pos;  // Temporarily store the transformed vertex positions for use below
-    fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
+    fs_LightVec = lightPos - modelposition + vec4(u_Snow);  // Compute the direction in which the light source lies
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is used to render the final positions of the geometry's vertices
     fs_Pos = pos;
 }
