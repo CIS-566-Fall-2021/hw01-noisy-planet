@@ -64,7 +64,7 @@ function main() {
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
-  renderer.setClearColor(0.6, 0.78, 0.87, 1.0);
+  renderer.setClearColor(16 /255., 18/255., 23/255., 1.);
   gl.enable(gl.DEPTH_TEST);
 
   const lambert = new ShaderProgram([
@@ -75,6 +75,11 @@ function main() {
   const customNoise = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/customNoise-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/customNoise-frag.glsl')),
+  ]);
+
+  const terrain = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/terrain-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/terrain-frag.glsl')),
   ]);
 
   // initial overlay colour
@@ -110,18 +115,33 @@ function main() {
     // ]);
     
     //custom noise render
-    colourController.onChange( function( colour ) {
-      let col = vec4.fromValues(colour[0] / 255.0, 
-                                colour[1] / 255.0, 
+    // colourController.onChange( function( colour ) {
+    //   let col = vec4.fromValues(colour[0] / 255.0, 
+    //                             colour[1] / 255.0, 
+    //                             colour[2] / 255.0, 1)
+    //   customNoise.setGeometryColor(col)
+    // })
+    // customNoise.setTime(time);
+    // time++;
+    // renderer.render(camera, customNoise, [
+    //   icosphere,
+    //   // square,
+    //   // cube
+    // ]);
+
+    //custom noise render
+    colourController.onChange(function (colour) {
+      let col = vec4.fromValues(colour[0] / 255.0,
+                                colour[1] / 255.0,
                                 colour[2] / 255.0, 1)
-      customNoise.setGeometryColor(col)
+      terrain.setGeometryColor(col)
     })
-    customNoise.setTime(time);
+    terrain.setTime(time);
     time++;
-    renderer.render(camera, customNoise, [
-      // icosphere,
+    renderer.render(camera, terrain, [
+      icosphere,
       // square,
-      cube
+      // cube
     ]);
 
     stats.end();
