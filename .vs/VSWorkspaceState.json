@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\rendering",
+    "\\src\\rendering\\gl",
+    "\\src\\shaders"
+  ],
+  "SelectedNode": "\\src\\rendering\\gl\\OpenGLRenderer.ts",
+  "PreviewInSolutionExplorer": false
+}
