@@ -36,6 +36,8 @@ class OpenGLRenderer {
         prog.setTime(this.time);
         this.time += 0.01;
 
+        prog.setCameraPos(camera.position);
+
         for (let drawable of drawables) {
             prog.draw(drawable);
         }

@@ -1,4 +1,4 @@
-import { vec4, mat4 } from 'gl-matrix';
+import { vec4, mat4, vec3 } from 'gl-matrix';
 import Drawable from './Drawable';
 import { gl } from '../../globals';
 
@@ -36,6 +36,8 @@ class ShaderProgram {
     unifSandHeight: WebGLUniformLocation;
     unifGrassHeight: WebGLUniformLocation;
     unifStoneHeight: WebGLUniformLocation;
+    unifShader: WebGLUniformLocation;
+    unifCameraPos: WebGLUniformLocation;
 
     constructor(shaders: Array<Shader>) {
         this.prog = gl.createProgram();
@@ -62,6 +64,8 @@ class ShaderProgram {
         this.unifSandHeight = gl.getUniformLocation(this.prog, "u_sandHeight");
         this.unifGrassHeight = gl.getUniformLocation(this.prog, "u_grassHeight");
         this.unifStoneHeight = gl.getUniformLocation(this.prog, "u_stoneHeight");
+        this.unifShader = gl.getUniformLocation(this.prog, "u_Shader");
+        this.unifCameraPos = gl.getUniformLocation(this.prog, "u_CameraPos");
     }
 
     use() {
@@ -145,6 +149,20 @@ class ShaderProgram {
         this.use();
         if (this.unifStoneHeight !== -1) {
             gl.uniform1f(this.unifStoneHeight, stoneHeight);
+        }
+    }
+
+    setShader(Shader: number) {
+        this.use();
+        if (this.unifShader !== -1) {
+            gl.uniform1i(this.unifShader, Shader);
+        }
+    }
+
+    setCameraPos(cameraPos: vec3) {
+        this.use();
+        if (this.unifCameraPos !== -1) {
+            gl.uniform3fv(this.unifCameraPos, cameraPos);
         }
     }
 

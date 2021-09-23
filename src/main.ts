@@ -12,7 +12,7 @@ import ShaderProgram, { Shader } from './rendering/gl/ShaderProgram';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-    tesselations: 6,
+    tesselations: 8,
     'Load Scene': loadScene, // A function pointer, essentially
     DesaturateColor: [255, 255, 255],
     DesaturatePercent: 0.0,
@@ -21,12 +21,13 @@ const controls = {
     SandHeight: 0.2,
     GrassHeight: 0.4,
     StoneHeight: 0.75,
+    Blinn_phong: true,
 };
 
 let icosphere: Icosphere;
 let square: Square;
 let cube: Cube;
-let prevTesselations: number = 6;
+let prevTesselations: number = 8;
 
 function loadScene() {
     icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
@@ -48,8 +49,9 @@ function main() {
 
     // Add controls to the gui
     const gui = new DAT.GUI();
-    gui.add(controls, 'tesselations', 0, 8).step(1);
+    gui.add(controls, 'tesselations', 0, 9).step(1);
     gui.add(controls, 'Load Scene');
+    gui.add(controls, 'Blinn_phong').onChange(setBlinnReflection);
     gui.addColor(controls, 'DesaturateColor').onChange(setAllGeometryColor);
     gui.add(controls, "DesaturatePercent", 0.0, 1.0).step(0.01).onChange(setDesatPercent);
     gui.add(controls, "LandscapeHeight", 0.0, 5.0).step(0.1).onChange(setLandscapeHeight);
@@ -93,6 +95,7 @@ function main() {
     custom.setSandHeight(0.2);
     custom.setGrassHeight(0.4);
     custom.setStoneHeight(0.75);
+    custom.setShader(0);
 
     // This function will be called every frame
     function tick() {
@@ -165,6 +168,15 @@ function main() {
 
     function setStoneHeight() {
         custom.setStoneHeight(controls.StoneHeight);
+    }
+
+    function setBlinnReflection() {
+        if (controls.Blinn_phong) {
+            custom.setShader(0);
+        }
+        else {
+            custom.setShader(1);
+        }
     }
 }
 

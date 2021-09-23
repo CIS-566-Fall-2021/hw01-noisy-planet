@@ -6,6 +6,6 @@
     "\\src\\rendering\\gl",
     "\\src\\shaders"
   ],
-  "SelectedNode": "\\src\\main.ts",
+  "SelectedNode": "\\src\\rendering\\gl\\OpenGLRenderer.ts",
   "PreviewInSolutionExplorer": false
 }

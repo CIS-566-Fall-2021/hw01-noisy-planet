@@ -1,6 +1,33 @@
 # CIS 566 Project 1: Noisy Planets
 
-Haowei Li
+Name: Haowei Li
+PennKey: lihaowei
+
+A fractal-brownian-motion function https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
+Live Demo Link: https://hli605.github.io/hw01-noisy-planet/
+
+Planet with Blinn-Phong reflection model:
+![](./MyPlanet1.png)
+
+Planet with Blinn-Phong and desaturation to a cyan color:
+![](./MyPlanetDesat1.png)
+
+Planet with Lambert reflection model:
+![](./MyPlanetLambert.png)
+
+Technical Details:
+1. I used a simple 3D perlin noise function and incorporate that function inside the fractal-brownian-motion noise function. Then, I used the fbm noise function to generate the surface height of the planet. Next, according to different heights at different location, I created 5 biomes: Ocean, Beach, Grassland, Stone Mountains, Snow Mountains.
+
+2. I used "sin" and "bias" toolbox function to simulate the High tide/low tide effects of the ocean. I used "gain" toolbox function to enable the players to desaturate the color of the planet. I used "smoothstep" toolbox function to make the smooth transition between different biomes.
+
+3. I implemented "Lambert" and "Blinn-Phong" reflection model. Also, I assigned different specular value for different biomes.
+
+4. The user can choose whether to use Blinn-Phong reflection or Lambert reflection. The user can modify the desaturation color, the desaturation percentage, the landscape height, the time scale, and the distribution of biomes.
+
+
+
+
+
 
 ## Objective
 - Continue practicing WebGL and Typescript
