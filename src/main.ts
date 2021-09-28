@@ -9,10 +9,6 @@ import Camera from './Camera';
 import { setGL } from './globals';
 import ShaderProgram, { Shader } from './rendering/gl/ShaderProgram';
 
-const LAMBERT = 0;
-const BLINN = 1;
-const AMBIENT = 2;
-
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
@@ -22,7 +18,7 @@ const controls = {
   speed: 0,
   height: 5,
   octaves: 4,
-  ambient_light: 1,
+  ambient_light: 2,
   shading_model: 0,
 };
 

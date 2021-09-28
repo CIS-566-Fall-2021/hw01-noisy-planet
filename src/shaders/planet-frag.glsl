@@ -89,10 +89,11 @@ void main()
         } else {
           diffuseColor = iceCol;
         }
+        vec4 nor = fs_Nor;
+        nor.xyz =  normalize(cross(dFdx(fs_Pos.xyz),dFdy(fs_Pos.xyz)));
 
-      
         // Calculate the diffuse term for different shading
-        float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
+        float diffuseTerm = dot(normalize(nor), normalize(fs_LightVec));
         // Avoid negative lighting values
         diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);
         float ambientTerm = 0.25*float(u_Light);
@@ -107,7 +108,7 @@ void main()
           H = normalize(H);
           float exp = 80.f;
             // Material base color (before shading)
-          diffuseColor += max(pow(dot(normalize(H), normalize(fs_Nor)), exp), 0.0);
+          diffuseColor += max(pow(dot(normalize(H), normalize(nor)), exp), 0.0);
           out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
           
         } else if (u_ShadingModel == 2){

@@ -83,9 +83,35 @@ float fbm(vec3 x) {
 	return v;
 }
 
-float f(vec3 pos){
-    return fbm(pos.xyz + fbm( pos.xyz + fbm( pos.xyz )));
+//toolbox functions
+float bias(float b, float t) {
+    return pow(t,log(b)/log(0.5f));
 }
+
+float gain(float g, float t) {
+    if (t < 0.5f) 
+        return bias(1.0-g, 2.0*t) / 2.0;
+     else 
+        return 1.0 - bias(1.0-g, 2.0-2.0*t) / 2.0;
+}
+
+// vec3 f2(vec3 pos,float warp_noise,float mult){
+//     return pos + fs_Nor.xyz * warp_noise * mult;  
+// }
+
+float f(vec3 pos){
+    return bias(0.8f, 2.f) * fbm(pos.xyz + fbm( pos.xyz + fbm( pos.xyz )));
+}
+
+// vec3 f(vec3 pos){
+//     float noise = fbm(pos.xyz + fbm( pos.xyz + fbm( pos.xyz )));
+//     return vec3(noise);
+// }
+
+
+
+
+
 void main()
 {
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
@@ -106,15 +132,8 @@ void main()
     } else {
     pos += fs_Nor * threshold * mult;      
     }
-
-    fs_Nor.xyz *= warp_noise;
-    fs_Nor.xyz = mat3(u_ModelInvTr) * vs_Nor.xyz;
-
-    // fs_Nor.xyz = normalize(cross(dFdx(pos.xyz), dFdy(pos.xyz))); 
-
-    // fs_Nor.xyz = vec3(f(pos.xyz + warp_noise) - f(pos.xyz - warp_noise), f(pos.xyz + warp_noise) - f(pos.xyz - warp_noise), f(pos.xyz + warp_noise) - f(pos.xyz - warp_noise));
     
-    fs_noise = warp_noise;                
+    fs_noise = warp_noise;   
 
     //plug into model position                                            
     vec4 modelposition = u_Model * pos;  // Temporarily store the transformed vertex positions for use below
