@@ -69,12 +69,19 @@ float noise(vec3 p){
     return o4.y * d.y + o4.x * (1.0 - d.y);
 }
 
+// float cubicPulse(float c, float w, float x){
+//     x = fabsf(x-c);
+//     if(x>w) return 0.0f;
+//     x/=w;
+//     return 1.0f - x*x*(3.0f-2.0f*x);
+// }
+
 #define NUM_OCTAVES u_Shift
 float fbm(vec3 x) {
     float time = float(u_Time);
 	float v = 0.0;
 	float a = 0.9; //0.5
-	vec3 shift = vec3(100) + sin(time*0.001);
+	vec3 shift = vec3(100) + cos(time*0.001);
 	for (int i = 0; i < NUM_OCTAVES; ++i) {
 		v += a * noise(x);
 		x = x * 2.25 + shift; //2.0
@@ -95,22 +102,6 @@ float gain(float g, float t) {
         return 1.0 - bias(1.0-g, 2.0-2.0*t) / 2.0;
 }
 
-// vec3 f2(vec3 pos,float warp_noise,float mult){
-//     return pos + fs_Nor.xyz * warp_noise * mult;  
-// }
-
-float f(vec3 pos){
-    return bias(0.8f, 2.f) * fbm(pos.xyz + fbm( pos.xyz + fbm( pos.xyz )));
-}
-
-// vec3 f(vec3 pos){
-//     float noise = fbm(pos.xyz + fbm( pos.xyz + fbm( pos.xyz )));
-//     return vec3(noise);
-// }
-
-
-
-
 
 void main()
 {
@@ -124,7 +115,7 @@ void main()
     //new code                        
     float fbm_noise = fbm(pos.xyz);  
     float warp_noise = fbm(pos.xyz + fbm( pos.xyz + fbm( pos.xyz )));
-    float threshold = 0.75;
+    float threshold = 0.75 + gain(0.75, abs(sin(time*0.005))-0.05);
     float mult = float(u_Height) * 0.1;
  
     if(warp_noise > threshold){
@@ -132,7 +123,7 @@ void main()
     } else {
     pos += fs_Nor * threshold * mult;      
     }
-    
+
     fs_noise = warp_noise;   
 
     //plug into model position                                            

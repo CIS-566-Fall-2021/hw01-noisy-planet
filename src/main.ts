@@ -12,7 +12,7 @@ import ShaderProgram, { Shader } from './rendering/gl/ShaderProgram';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  tesselations: 6,
+  tesselations: 8,
   'Load Scene': loadScene, // A function pointer, essentially
   color: [113, 188, 255, 1],
   speed: 0,
@@ -49,7 +49,7 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
-  gui.add(controls, 'tesselations', 0, 8).step(1);
+  gui.add(controls, 'tesselations', 0, 10).step(1);
   gui.add(controls, 'Load Scene');
   gui.addColor(controls, 'color');
   gui.add(controls, 'speed', 0, 10).step(0.1);

@@ -67,12 +67,14 @@ void main()
         float oceanMax = 0.75;
         //terrain - green
         vec4 terrainCol = vec4(0.35, 0.5, 0.31,1.0);
-        float terrainMax = 0.90;
+        float terrainMax = 0.9;
+        
         float t1 = smoothstep(oceanMax, terrainMax, fs_noise);
         terrainCol = mix(oceanCol, terrainCol,t1);
         //mountain ranges - yellow
         vec4 mountainCol = vec4(0.64, 0.56, 0.43,1.0);
         float mountainMax = 1.05;
+
         float t2 = smoothstep(terrainMax, mountainMax, fs_noise);
         mountainCol = mix(terrainCol, mountainCol,t2);
         //ice cap - white
