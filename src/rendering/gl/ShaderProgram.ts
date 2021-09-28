@@ -1,4 +1,4 @@
-import { vec4, mat4 } from 'gl-matrix';
+import { vec4, mat4, vec3 } from 'gl-matrix';
 import Drawable from './Drawable';
 import { gl } from '../../globals';
 
@@ -32,7 +32,9 @@ class ShaderProgram {
   unifTime: WebGLUniformLocation;
   unifHeight: WebGLUniformLocation;
   unifShift: WebGLUniformLocation;
-  unifSnow: WebGLUniformLocation;
+  unifLight: WebGLUniformLocation;
+  unifCameraPos: WebGLUniformLocation;
+  unifShader: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -56,7 +58,10 @@ class ShaderProgram {
     this.unifTime = gl.getUniformLocation(this.prog, 'u_Time');
     this.unifHeight = gl.getUniformLocation(this.prog, 'u_Height');
     this.unifShift = gl.getUniformLocation(this.prog, 'u_Shift');
-    this.unifSnow = gl.getUniformLocation(this.prog, 'u_Snow');
+    this.unifLight = gl.getUniformLocation(this.prog, 'u_Light');
+    this.unifCameraPos = gl.getUniformLocation(this.prog, 'u_CameraPos');
+
+    this.unifShader = gl.getUniformLocation(this.prog, 'u_ShadingModel');
   }
 
   use() {
@@ -115,10 +120,24 @@ class ShaderProgram {
     }
   }
 
-  setSnow(h: number) {
+  setLight(h: number) {
     this.use();
-    if (this.unifSnow !== -1) {
-      gl.uniform1i(this.unifSnow, h);
+    if (this.unifLight !== -1) {
+      gl.uniform1i(this.unifLight, h);
+    }
+  }
+
+  setCameraPos(campos: vec3) {
+    this.use();
+    if (this.unifCameraPos !== -1) {
+      gl.uniform3fv(this.unifCameraPos, campos);
+    }
+  }
+
+  setShadingModel(shader: number) {
+    this.use();
+    if (this.unifShader !== -1) {
+      gl.uniform1i(this.unifShader, shader);
     }
   }
 

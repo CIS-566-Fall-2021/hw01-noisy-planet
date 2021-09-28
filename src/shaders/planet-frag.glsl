@@ -14,6 +14,11 @@ precision highp float;
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 uniform highp int u_Time; //bug after added
 uniform int u_ShadingModel;
+uniform mat4 u_Model;
+uniform mat4 u_ModelInvTr;
+
+uniform vec3 u_CameraPos;
+uniform highp int u_Light;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -21,7 +26,6 @@ in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
 in vec4 fs_Pos;  
-
 
 in float fs_noise;
 
@@ -86,31 +90,42 @@ void main()
           diffuseColor = iceCol;
         }
 
+      
         // Calculate the diffuse term for different shading
         float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
         // Avoid negative lighting values
         diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);
-        float ambientTerm = 0.2;
-        float lightIntensity = diffuseTerm + ambientTerm;
+        float ambientTerm = float(u_Light);
+        float lightIntensity = (diffuseTerm + ambientTerm) ;
 
-        //blinn
-        // if(u_ShadingModel == 1){
-        //   //average of view vector and light vector
-          vec4 fs_CameraPos = vec4(3.0);
-          vec4 H = (fs_LightVec + fs_CameraPos) / 2.f;
-          float exp = 100.f;
 
+        if(u_ShadingModel == 1){
+        //blinn-phong
+        //average of view vector and light vector
+        vec4 fs_CameraPos = vec4(u_CameraPos.xyz,1.0);
+        vec4 H = (fs_LightVec + fs_CameraPos) / 2.f;
+        H = normalize(H);
+        float exp = 80.f;
           // Material base color (before shading)
-          diffuseColor += max(pow(dot(normalize(H), normalize(fs_Nor)), exp), 0.0);
+        diffuseColor += max(pow(dot(normalize(H), normalize(fs_Nor)), exp), 0.0);
 
-        // //matcap
-        // } else if (u_ShadingModel == 2.0){
 
-        // } else {
-      
-        // }
-        // u_ShadingModel = 1;
+
         out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
+        
+        } else if (u_ShadingModel == 2){
+          // ambient lighting
+          diffuseColor *= 3.0f;
+          out_Col = vec4(diffuseColor.rgb * ambientTerm, diffuseColor.a);
+        } else if (u_ShadingModel == 3){
+          // diffuse
+          out_Col = vec4(diffuseColor.rgb * diffuseTerm, diffuseColor.a);
+        } else {
+          //lambert
+          out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
+        }
+
+       
         
         
 }

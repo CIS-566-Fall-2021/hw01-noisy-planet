@@ -22,7 +22,8 @@ precision highp float;
 uniform highp int u_Time;
 uniform highp int u_Height;
 uniform highp int u_Shift;
-uniform highp int u_Snow;
+
+uniform vec3 u_CameraPos;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
@@ -105,14 +106,19 @@ void main()
     } else {
     pos += fs_Nor * threshold * mult;      
     }
+
     fs_Nor.xyz *= warp_noise;
+    fs_Nor.xyz = mat3(u_ModelInvTr) * vs_Nor.xyz;
+
+    // fs_Nor.xyz = normalize(cross(dFdx(pos.xyz), dFdy(pos.xyz))); 
+
     // fs_Nor.xyz = vec3(f(pos.xyz + warp_noise) - f(pos.xyz - warp_noise), f(pos.xyz + warp_noise) - f(pos.xyz - warp_noise), f(pos.xyz + warp_noise) - f(pos.xyz - warp_noise));
     
     fs_noise = warp_noise;                
 
     //plug into model position                                            
     vec4 modelposition = u_Model * pos;  // Temporarily store the transformed vertex positions for use below
-    fs_LightVec = lightPos - modelposition + vec4(u_Snow);  // Compute the direction in which the light source lies
+    fs_LightVec = lightPos - modelposition ;  // Compute the direction in which the light source lies
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is used to render the final positions of the geometry's vertices
     fs_Pos = pos;
 }

@@ -11,7 +11,7 @@ import ShaderProgram, { Shader } from './rendering/gl/ShaderProgram';
 
 const LAMBERT = 0;
 const BLINN = 1;
-const MATCAP = 2;
+const AMBIENT = 2;
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -22,8 +22,8 @@ const controls = {
   speed: 0,
   height: 5,
   octaves: 4,
-  light: 0,
-  shading_model: LAMBERT,
+  ambient_light: 1,
+  shading_model: 0,
 };
 
 let icosphere: Icosphere;
@@ -59,8 +59,8 @@ function main() {
   gui.add(controls, 'speed', 0, 10).step(0.1);
   gui.add(controls, 'height', 1, 15).step(1);
   gui.add(controls, 'octaves', 3, 10).step(1);
-  gui.add(controls, 'light', -100, 100).step(0.1);
-  gui.add(controls, 'shading_model', 0, 2).step(1);
+  gui.add(controls, 'ambient_light', 0, 3).step(0.1);
+  gui.add(controls, 'shading_model', { lambert: 0, 'blinn-phong': 1, ambient: 2, specular: 3 });
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement>document.getElementById('canvas');
@@ -80,16 +80,6 @@ function main() {
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.1, 0.1, 0.1, 1);
   gl.enable(gl.DEPTH_TEST);
-
-  const lambert = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
-  ]);
-
-  const noise = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/noise-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/noise-frag.glsl')),
-  ]);
 
   const planet = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/planet-vert.glsl')),
@@ -120,7 +110,9 @@ function main() {
       time * controls.speed,
       controls.height,
       controls.octaves,
-      controls.light
+      controls.ambient_light,
+      camera.position,
+      controls.shading_model
     );
     stats.end();
 
