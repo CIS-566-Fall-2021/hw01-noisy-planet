@@ -1,4 +1,19 @@
 # Serena Gandhi (gserena), Noisy Planets
+# Link:
+# Images:
+# Overview:
+- five biomes (distinguished by color): water, sand, grass (green and burnt sienna), rock, and snow
+- uses gain and bias to transition between biomes
+- uses an impulse function to set height threshold according to time. This is the feature noted in the gui as "global warming"
+- uses a power curve function to transition between normal (green) and hot (burnt sienna) global temperatures
+- features Blinn Phong shading on oceans
+- features Lambertian shading everywhere else
+- gui contains controls to modify colors of biomes, speed of planet and moon animation, and global warming speed (how fast terrain moves above/below water).
+- features a moon that orbits the planet.
+- Worley noise and fbm noise are combined to create terrain texture on planet
+- fbm noise used on moon
+
+
 # External Sources:
 - https://github.com/dmnsgn/glsl-rotate for rotation matrix used to cause the moon to orbit planet
 - http://demofox.org/biasgain.html for bias and gain functions used to transition between biomes
