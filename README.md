@@ -1,5 +1,9 @@
-**#Serena Gandhi (gserena), Noisy Planets
-**
+# Serena Gandhi (gserena), Noisy Planets
+# External Sources:
+- https://github.com/dmnsgn/glsl-rotate for rotation matrix used to cause the moon to orbit planet
+- http://demofox.org/biasgain.html for bias and gain functions used to transition between biomes
+- https://www.iquilezles.org/www/articles/functions/functions.htm for power curve and impulse functions used to create seasons and thresholds on biome height
+
 
 # CIS 566 Project 1: Noisy Planets
 
