@@ -1,3 +1,6 @@
+**#Serena Gandhi (gserena), Noisy Planets
+**
+
 # CIS 566 Project 1: Noisy Planets
 
 ## Objective
