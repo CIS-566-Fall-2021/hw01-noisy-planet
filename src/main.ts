@@ -59,8 +59,8 @@ function main() {
   gui.add(controls, 'speed', 0, 10).step(0.1);
   gui.add(controls, 'height', 1, 15).step(1);
   gui.add(controls, 'octaves', 3, 10).step(1);
-  gui.add(controls, 'ambient_light', 0, 3).step(0.1);
-  gui.add(controls, 'shading_model', { lambert: 0, 'blinn-phong': 1, ambient: 2, specular: 3 });
+  gui.add(controls, 'ambient_light', 1, 5).step(0.1);
+  gui.add(controls, 'shading_model', { lambert: 0, 'blinn-phong': 1, 'ambient-only': 2, 'diffuse-only': 3 });
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement>document.getElementById('canvas');

@@ -95,27 +95,23 @@ void main()
         float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
         // Avoid negative lighting values
         diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);
-        float ambientTerm = float(u_Light);
+        float ambientTerm = 0.25*float(u_Light);
         float lightIntensity = (diffuseTerm + ambientTerm) ;
 
 
         if(u_ShadingModel == 1){
-        //blinn-phong
-        //average of view vector and light vector
-        vec4 fs_CameraPos = vec4(u_CameraPos.xyz,1.0);
-        vec4 H = (fs_LightVec + fs_CameraPos) / 2.f;
-        H = normalize(H);
-        float exp = 80.f;
-          // Material base color (before shading)
-        diffuseColor += max(pow(dot(normalize(H), normalize(fs_Nor)), exp), 0.0);
-
-
-
-        out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
-        
+          //blinn-phong
+          //average of view vector and light vector
+          vec4 fs_CameraPos = vec4(u_CameraPos.xyz,1.0);
+          vec4 H = (fs_LightVec + fs_CameraPos) / 2.f;
+          H = normalize(H);
+          float exp = 80.f;
+            // Material base color (before shading)
+          diffuseColor += max(pow(dot(normalize(H), normalize(fs_Nor)), exp), 0.0);
+          out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
+          
         } else if (u_ShadingModel == 2){
           // ambient lighting
-          diffuseColor *= 3.0f;
           out_Col = vec4(diffuseColor.rgb * ambientTerm, diffuseColor.a);
         } else if (u_ShadingModel == 3){
           // diffuse
