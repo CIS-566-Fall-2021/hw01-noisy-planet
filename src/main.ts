@@ -15,11 +15,11 @@ const controls = {
   tesselations: 8,
   'Load Scene': loadScene, // A function pointer, essentially
   color: [113, 188, 255, 1],
-  speed: 0,
+  speed: 1.0,
   height: 5,
   octaves: 4,
   ambient_light: 2,
-  shading_model: 0,
+  mode: 0,
 };
 
 let icosphere: Icosphere;
@@ -56,7 +56,7 @@ function main() {
   gui.add(controls, 'height', 1, 15).step(1);
   gui.add(controls, 'octaves', 3, 10).step(1);
   gui.add(controls, 'ambient_light', 1, 5).step(0.1);
-  gui.add(controls, 'shading_model', { lambert: 0, 'blinn-phong': 1, 'ambient-only': 2, 'diffuse-only': 3 });
+  gui.add(controls, 'mode', { lambert: 0, 'blinn-phong': 1, 'ambient-only': 2, 'diffuse-only': 3, pulsing: 4 });
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement>document.getElementById('canvas');
@@ -108,7 +108,7 @@ function main() {
       controls.octaves,
       controls.ambient_light,
       camera.position,
-      controls.shading_model
+      controls.mode
     );
     stats.end();
 

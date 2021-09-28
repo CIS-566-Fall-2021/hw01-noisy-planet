@@ -13,7 +13,7 @@ precision highp float;
 
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 uniform highp int u_Time; //bug after added
-uniform int u_ShadingModel;
+uniform lowp int u_ShadingModel;
 uniform mat4 u_Model;
 uniform mat4 u_ModelInvTr;
 

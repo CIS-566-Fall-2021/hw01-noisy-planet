@@ -23,6 +23,8 @@ uniform highp int u_Time;
 uniform highp int u_Height;
 uniform highp int u_Shift;
 
+uniform lowp int u_ShadingModel; //incorporate mode too
+
 uniform vec3 u_CameraPos;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
@@ -115,8 +117,12 @@ void main()
     //new code                        
     float fbm_noise = fbm(pos.xyz);  
     float warp_noise = fbm(pos.xyz + fbm( pos.xyz + fbm( pos.xyz )));
-    float threshold = 0.75 + gain(0.75, abs(sin(time*0.005))-0.05);
+    float threshold = 0.75;
     float mult = float(u_Height) * 0.1;
+
+    if(u_ShadingModel == 4){
+        threshold = 0.75 + gain(0.75, abs(sin(time*0.005))-0.05);
+    }
  
     if(warp_noise > threshold){
     pos += fs_Nor * warp_noise * mult;  
