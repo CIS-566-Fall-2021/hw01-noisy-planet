@@ -26,7 +26,7 @@ https://gserena01.github.io/hw01-noisy-planet/
 # Project Description:
 
 
-# CIS 566 Project 1: Noisy Planets
+## CIS 566 Project 1: Noisy Planets
 
 ## Objective
 - Continue practicing WebGL and Typescript
