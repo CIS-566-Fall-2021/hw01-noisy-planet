@@ -1,5 +1,6 @@
-# Serena Gandhi (gserena), Noisy Planets
+# Serena Gandhi (gserena), Noisy Planets 
 # Link:
+https://gserena01.github.io/hw01-noisy-planet/
 # Images:
 # Overview:
 - five biomes (distinguished by color): water, sand, grass (green and burnt sienna), rock, and snow
@@ -20,7 +21,12 @@
 - https://www.iquilezles.org/www/articles/functions/functions.htm for power curve and impulse functions used to create seasons and thresholds on biome height
 
 
-# CIS 566 Project 1: Noisy Planets
+
+# 
+# Project Description:
+
+
+## CIS 566 Project 1: Noisy Planets
 
 ## Objective
 - Continue practicing WebGL and Typescript
