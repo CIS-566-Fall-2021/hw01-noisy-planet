@@ -1,5 +1,21 @@
 # CIS 566 Project 1: Noisy Planets
 
+## Submission
+- https://feliyick.github.io/hw01-noisy-planet/
+
+![image](https://user-images.githubusercontent.com/59979404/135326821-759f23ad-2b8d-4c34-a3c7-6730bb84c8fd.png)
+
+
+- Planet inspired from my alien mini minecraft from Spring 2020 :)
+- Biome types are enumerated and are determined using a worley fbm noise function.
+- Different levels of summed perlin are used for biome heights, and various noise functions and cosine colour palettes in combination with bias and gain are used to colour the terrain.
+- There are four four different biomes: slime ocean, ice mountains, pink desert, and purple grasslands. 
+- Slime ocean is animated/displaced in x and y directions using sin and easeInOutQuadratic functions
+- There are GUI controls for land distribution, light source speed, and flower distribution.
+- The flowers are created using a pow(fbm) for texturing and placement. 
+- Blinn phong shading on mountains, ice caps, and ocean. Lambert shading on the grass and desert.
+- Noise functions used are all 3D
+
 ## Objective
 - Continue practicing WebGL and Typescript
 - Experiment with noise functions to procedurally generate the surface of a planet
