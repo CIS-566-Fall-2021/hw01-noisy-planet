@@ -28,7 +28,7 @@ function loadScene() {
   icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
   icosphere.create();
   if(set_text==1){
-    icosphere.loadTexture('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/ab371d58-f694-4953-a2e5-c79acedd9f56/dcuxgeq-1005a082-f321-4d7c-80d7-5cb2e4ffda89.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcL2FiMzcxZDU4LWY2OTQtNDk1My1hMmU1LWM3OWFjZWRkOWY1NlwvZGN1eGdlcS0xMDA1YTA4Mi1mMzIxLTRkN2MtODBkNy01Y2IyZTRmZmRhODkucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.wAvefXk3lTLluz8RfuvjXvRWBMik2psG6kWva8Fbe2I');
+    icosphere.loadTexture('https://images.designtrends.com/wp-content/uploads/2016/07/22160902/Cracked-Textures.jpg');
   }
   }
 function Settexture(){

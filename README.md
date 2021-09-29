@@ -2,10 +2,7 @@
 
 ## Info
 - Lanqing Bao (lanqing)
-- Link: 
-![](1.gif)
-![](2.gif)
-
+- Link: https://seiseiko.github.io/hw01-noisy-planet/
 # Result
 ## Terrain Generation
 - Main func: float terrain_generate(vec3 p) in vertex shader, calculate continent noise, ridged fractal noise, and mask for mountain.
@@ -26,6 +23,13 @@
 - Ocean parameters
 - Sun position 
 - Load texture(press Set Text then Load Scene)
+## Screenshots
+
+![](4.gif)
+![](3.gif)
+![](1.gif)
+
+![](2.gif)
 
 ## Citation 
 - How to implement ray sphere casting https://gist.github.com/wwwtyro/beecc31d65d1004f5a9d

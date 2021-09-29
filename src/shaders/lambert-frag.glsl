@@ -194,12 +194,12 @@ vec3 palette(float t, vec3 a, vec3 b, vec3 c, vec3 d )
 void main()
 {
         vec4 mountain_color = vec4(0.2549, 0.251, 0.251, 1.0);
-        vec4 grass_color = vec4(0.1804, 0.1922, 0.1804, 1.0);
+        vec4 grass_color = vec4(0.1804, 0.1922, 0.1804, 1.0)+vec4(vec3(sin(u_Time*0.002)*(snoise(fs_Pos.xyz)+1.0))*0.02,1.0);
         vec3 a = vec3(0.5, 0.5, 0.5);		
         vec3 b = vec3(0.5, 0.5, 0.5);	
         vec3 c = vec3(1.0, 1.0, 0.5);	
         vec3 d = vec3(0.80, 0.90, 0.30);
-        vec4 snow_color = vec4(palette(sin(u_Time*0.002),a,b,c,d),1.0);
+        vec4 snow_color = vec4(palette(sin(u_Time*0.002)*(snoise(fs_Pos.xyz)+1.0),a,b,c,d),1.0);
 
         vec4 shore_color = vec4(0.3922, 0.3451, 0.2745, 1.0);
         vec4 ocean_color = vec4(0.5451, 0.8549, 1.0, 1.0);
@@ -256,8 +256,8 @@ void main()
             float u = atan(n.x, n.z) / (2.0*3.14159) + 0.5;
             float v = n.y*0.5+0.5;
             vec4 t = texture(u_Text,vec2(u,v));
-            if(length(t.xyz)<=0.2){
-                float textStrength =  1.0 - bias(length(t.xyz)/1.8,0.5);
+            if(length(t.xyz)<=0.8){
+                float textStrength =  1.0 - bias(length(t.xyz)/0.8,0.5);
                 diffuseColor = mix(diffuseColor,t,textStrength);
             }
         }
