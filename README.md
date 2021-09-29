@@ -1,70 +1,59 @@
 # CIS 566 Project 1: Noisy Planets
 
-## Objective
-- Continue practicing WebGL and Typescript
-- Experiment with noise functions to procedurally generate the surface of a planet
-- Review surface reflection models
+**Author: Ashley Alexander-Lee** (asalexan)
 
-## Base Code
-You'll be using the same base code as in homework 0.
+All credit for the 3D worley and perlin noise base code goes to Adam Mally and the 560/561 slides. The ease-in and ease-out functions were referenced from easings.net, and the bias and gain functions were detailed in the 566 lecture slides.
 
-## Assignment Details
-- Update the basic scene from your homework 0 implementation so that it renders
-an icosphere once again. We recommend increasing the icosphere's subdivision
-level to 6 so you have more vertices with which to work.
-- Write a new GLSL shader program that incorporates various noise functions and
-noise function permutations to offset the vertices on the surface of the icosphere and modify the color of the icosphere so that it looks like a planet with geographic
-features. Your planet should have __at least four distinct "biomes"__ on its surface (they do not have to be Earth biomes). Try making formations like mountain ranges, oceans, rivers, lakes, canyons, volcanoes, ice caps, glaciers, or even forests. We recommend using 3D noise functions whenever possible so that you don't have UV distortion, though that effect may be desirable if you're trying to make the poles of your planet stand out more.
-- Combined with your noise functions, use __at least four__ different functions from the Toolbox Functions slides. They should be used to either adjust your noise distribution, or animate elements on your planet's surface.
-- Implement __at least two__ surface reflection model (e.g. Lambertian, Blinn-Phong,
-Matcap/Lit Sphere, Raytraced Specular Reflection) besides on the planet's surface to
-better distinguish the different formations (and perhaps even biomes) on the
-surface of your planet. Make sure your planet has a "day" side and a "night"
-side; you could even place small illuminated areas on the night side to
-represent cities lit up at night.
-- Add GUI elements via dat.GUI that allow the user to modify different
-attributes of your planet. This can be as simple as changing the relative
-location of the sun to as complex as redistributing biomes based on overall
-planet temperature. You should have __at least three modifiable attributes__.
-- Have fun experimenting with different features on your planet. If you want,
-you can even try making multiple planets! Your score on this assignment is in
-part dependent on how interesting you make your planet, so try to
-experiment with as much as you can!
+### Description
+This project involved generating a procedural planet with WebGL and Typescript using noise and transition functions. A live demo can be found at https://asalexan.github.io/hw01-noisy-planet/ . If you wish to try it out locally, you can simply clone the repository, run `npm i` to install dependencies, and type `npm start` to run it on a local host.
 
-Here are some examples of procedural planets:
-- [Pixel Planet](https://deep-fold.itch.io/pixel-planet-generator)
-- [Earthlike Planet](https://www.reddit.com/r/proceduralgeneration/comments/fqk56t/animation_procedural_planet_composition/)
-- [Topographic Field](https://www.shadertoy.com/view/llscW7)
-- [Dan's Final Project](https://vimeo.com/216265946)
+![Title Image](images/title.png)
 
-## Useful Links
-- [Implicit Procedural Planet Generation](https://static1.squarespace.com/static/58a1bc3c3e00be6bfe6c228c/t/58a4d25146c3c4233fb15cc2/1487196929690/ImplicitProceduralPlanetGeneration-Report.pdf)
-- [Curl Noise](https://petewerner.blogspot.com/2015/02/intro-to-curl-noise.html)
-- [GPU Gems Chapter on Perlin Noise](http://developer.download.nvidia.com/books/HTML/gpugems/gpugems_ch05.html)
-- [Worley Noise Implementations](https://thebookofshaders.com/12/)
+### Usage
+- Click and drag to rotate the camera around the planet
+- Scroll to zoom in and out
+- To change the light position, move the x, y, z sliders in the righthand controls
+- To change the city density along the coast, move the `City Density` slider
+- To lessen the glow from the mountains, move the `% Mountain Glow` slider
+- To increase or decrease the planet tesselations, move the slider at the top
+- You can toggle the sun on or off as desired
 
 
-## Submission
-Commit and push to Github, then __make a pull request on the original Github repository__. Assignments will no longer be submitted on Canvas.
+### Features
+#### Mountain Biome
+I created a mountain biome using Worley noise, and heights above a certain threshold become snow. 
 
-For this assignment, and for all future assignments, modify this README file
-so that it contains the following information:
-- Your name and PennKey
-- Citation of any external resources you found helpful when implementing this
-assignment.
-- A link to your live github.io demo
-- At least one screenshot of your planet
-- An explanation of the techniques you used to generate your planet features.
-Please be as detailed as you can; not only will this help you explain your work
-to recruiters, but it helps us understand your project when we grade it!
+![Mountains](images/mountains.png)
 
-## Extra Credit
-Any or All of the following bonus items:
-- Use a 4D noise function to modify the terrain over time, where time is the
-fourth dimension that is updated each frame. A 3D function will work, too, but
-the change in noise will look more "directional" than if you use 4D.
-- Use music to animate aspects of your planet's terrain (e.g. mountain height,
-  brightness of emissive areas, water levels, etc.)
-- Create a background for your planet using a raytraced sky box that includes
-things like the sun, stars, or even nebulae.
-- Add a textured moon that orbits your planet
+During the night cycle, I ignore the lambertian term to allow the mountains to appear to "glow". I wanted it to seem as if the mountains were emitting light, so the grass below the mountains interpolates from the luminescent color to the lambertian color based on how close to the mountain the point is. 
+
+![Night Mountains](images/glowyMountains.png)
+
+#### Hill Biome
+The hills are a product of distorted perlin noise, which interpolates into either the ocean or mountains depending on the height and hemisphere. 
+![Hills](images/hills.png)
+
+At night, when the light is facing away from the biome, there are cities distributed based on the similarity of the original sphere normal and the height field normal. The more similar the normals are, the denser the cities become (you will notice the cities are the densest on the coastline). The user has the ability to change the density of lights on the coastline with a slider. 
+
+The lights themselves are created with worley noise, and the density is controlled by the grid size. If a point is below a certain max distance from a cell center, it becomes a light. This 'max distance' is the scale of the lights, which has to be interpolated along with the grid size. 
+
+![Cities](images/cities.png)
+
+#### The Sun
+The user can toggle the sun on and off, and the light position determines where the sun appears. The light position is projected to the surface of the sphere, then offset by some radius, which represents the distance of the light from the planet. The light itself is interpolated over the hemisphere over a cosine color palette. This gives it the subtle impression of bleeding into sunset before night falls. 
+
+![Sun](images/sun.png)
+
+#### Ocean Biome
+The ocean is shallower as it gets closer to the shoreline, and this shallow portion is animated to lap against the land continuously. The ocean is created by a certain noise threshold -- the noise interpolates between this 0 height ocean and either hills or mountains. I use the blinn-phong reflectance model to give the ocean a bit of a sheen in reaction to light hitting it. 
+
+### Bloopers (Features? Semantics)
+
+#### Just Trying To Animate the Water But This Is Ok I Guess
+![Blooper 1](images/blooper1.gif)
+
+#### This Was Definitely On Purpose
+![Blooper 2](images/blooper2.png)
+
+#### A Little Ambitious With Those Height Deformations...
+![Blooper 3](images/blooper3.png)
