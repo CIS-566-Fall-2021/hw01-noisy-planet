@@ -188,7 +188,12 @@ void main()
         float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier
                                                             //to simulate ambient lighting. This ensures that faces that are not
                                                             //lit by our point light are not completely black.
-                                                            
+
+
+        vec4 view = vec4(normalize(u_CamPos.xyz - fs_Pos.xyz), 1.);
+        vec4 H = normalize(view + vec4(normalize(fs_LightVec.xyz), 1.));
+        vec3 specularIntensity = pow(max(dot(H, normalize(fs_Nor)), 0.), 100.) * rgb(240., 243., 220.);
+                                           
         // palette
         vec3 grassPurple = grassPurple();
         vec3 mountainLilac = mountainLilac();
@@ -200,8 +205,10 @@ void main()
             color = waterSlime;
         } else if (biome_type <= 1.0) { // grass
             color = mix(waterSlime, grassPurple, 0.9);
+            specularIntensity = vec3(0.);
         } else if (biome_type <= 2.0) { // desert
             color = mix(grassPurple, desertPink, 0.3);
+            specularIntensity = vec3(0.);
         } else if (biome_type <= 3.0) { // mountain
             color = mix(desertPink, mountainLilac, 0.3);
         } else if (biome_type <= 4.0){ // ice
@@ -213,9 +220,6 @@ void main()
         if (flower_type == 1.0) {
             color = flowerYellow();
         }
-        vec4 view = vec4(normalize(u_CamPos.xyz - fs_Pos.xyz), 1.);
-        vec4 H = normalize(view + vec4(normalize(fs_LightVec.xyz), 1.));
-        vec3 specularIntensity = pow(max(dot(H, normalize(fs_Nor)), 0.), 100.) * rgb(240., 243., 220.);
 
         out_Col = vec4(color * lightIntensity + specularIntensity, 1.0);
 }
