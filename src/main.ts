@@ -73,8 +73,12 @@ function main() {
 
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
 
+  // const renderer = new OpenGLRenderer(canvas);
+  // renderer.setClearColor(0.9, 1.0, 1.0, 1);
+
   const renderer = new OpenGLRenderer(canvas);
-  renderer.setClearColor(0.1, 0.1, 0.1, 1);
+  renderer.setClearColor(0.9, 1.0, 1.0, 1);
+
   gl.enable(gl.DEPTH_TEST);
 
   const planet = new ShaderProgram([
