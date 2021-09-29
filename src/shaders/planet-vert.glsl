@@ -192,8 +192,7 @@ vec3 IDF(vec3 vec){
         vec3 totalSmall = (total + vec3(1.f)) * 0.5f;
       //smooth stepping so that the biomes blend smoothly
         totalSmall = smoothstep(0.f, 1.f, (smoothstep(0.25f, 0.75f, totalSmall)));
-       // totalSmall = (glm::smoothstep(0.25f, 0.75f, totalSmall));
-         return totalSmall;
+        return totalSmall;
   } 
 
 float hills(vec3 p)
