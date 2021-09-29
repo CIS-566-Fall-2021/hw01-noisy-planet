@@ -160,8 +160,7 @@ float fbm(float x, float y, float z, float octaves) {
 
 float GetBias(float time, float bias)
 {
-    // float time = (sin(float(u_Time) * 0.01) + 1.0) / 2.0;
-  return (float(time) / ((((1.0/bias) - 2.0)*(1.0 - float(time)))+1.0));
+    return (float(time) / ((((1.0/bias) - 2.0)*(1.0 - float(time)))+1.0));
 }
 
 float GetGain(float time, float gain)
