@@ -152,21 +152,18 @@ void main()
     float greenFBM = fbm(fs_Pos.xyz * .4, 3.0);
     float g = clamp(length(fs_Pos.xyz) / 1.2, 0.0, 1.0);
 
+    //cosine color palette for green
     vec3 grassCol = palette(greenFBM, green1.xyz, green2.xyz, green3.xyz, green4.xyz);
     // Material base color (before shading)
     vec4 greenColor = vec4(grassCol, 1.f);
-    //= vec4(104.f / 255.f,  163.f /255.f, 59.f / 255.f, 1.0);
-        vec4 blueColor = vec4(oceanCol, 1.f);
-        vec4 greyMt = vec4(.3, .3, .3, 1.f);
-        vec4 diffuseColor = blueColor;
-        //vec4(59.f / 255.f, 135.f / 255.f, 163.f / 255.f, 1.f);
-     
-        //float g = clamp(length(fs_Pos.xyz) / 1.2, 0.0, 1.0);
+  
+    vec4 blueColor = vec4(oceanCol, 1.f);
+    vec4 greyMt = vec4(.3, .3, .3, 1.f);
+    vec4 diffuseColor = blueColor;
 
-
-        float diffuseTerm = 0.f;
-        vec4 av = normalize(fs_LightVec) + normalize(fs_CamPos);
-         vec4 avg = av / 2.0;
+   float diffuseTerm = 0.f;
+    vec4 av = normalize(fs_LightVec) + normalize(fs_CamPos);
+    vec4 avg = av / 2.0;
          float specularIntensity = 0.f;
         
         // diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
@@ -195,19 +192,13 @@ void main()
             //else if(g > 1.02)
             else if (g >= 0.89)
             {
-                //.89 - .90
-                //float newG = g / .02 - 89.0;
-                //float newG = g * 25.0 - 21.5;
+               
                 float newG = remapTo01(.89, .92, g);
-              //  if(g >= .89)
-              //  {
+        
                     vec4 green = vec4(0.0, 1.0, 0.0, 1.0);
                     vec4 white = vec4(1.0);
                     diffuseColor = mix(greyMt, greenColor, 1.0-newG);
-               // }  
-                
-              
-                //diffuseColor = greenColor;
+  
                 diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
                 specularIntensity = 0.f;
             }
@@ -218,17 +209,14 @@ void main()
                 diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
                 specularIntensity = 0.f;
             }
-            //else if(g > 1.012)
+      
             else if (g > 0.845)
             {
                 diffuseColor = vec4(207.f / 255.f, 182.f / 255.f, 70.f / 255.f, 1.f);
                 diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
                 specularIntensity = 0.f;
             }
-
-
-           
-         //
+        //change the light color in light and shadow
         if(diffuseTerm < 0.f)
         {
             diffuseColor = diffuseColor * u_Shadow;
@@ -241,7 +229,6 @@ void main()
         vec3 diffuse3 = vec3(fs_Pos.x, fs_Pos.y, fs_Pos.z);
       
         // Avoid negative lighting values
-        // diffuseTerm = clamp(diffuseTerm, 0, 1);
 
         float ambientTerm = 0.2;
         diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);
