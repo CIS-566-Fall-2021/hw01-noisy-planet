@@ -116,6 +116,25 @@ float h(vec3 noiseinput) {
 
 }
 
+vec3 deform(vec3 p) {
+    float noiseScale = h(p);
+    // to make oceans not bumpy
+    if (noiseScale < 0.5) {
+        noiseScale = 0.5;
+    }
+
+    return (1.f + noiseScale) * p;
+}
+
+vec3 normalizeNZ(vec3 p) {
+    float l = length(p);
+    if (l < 0.01f) {
+        return p;
+    } else {
+        return p / l;
+    }
+}
+
 void main()
 {
     fs_Pos = vs_Pos;
@@ -133,36 +152,9 @@ void main()
 
     // to align color and displacement, use same noise function for frag and vert shader 
     vec3 noiseinput = modelposition.xyz;
-    float noiseScale = h(noiseinput);
+    vec3 dp = deform(noiseinput);
 
-    
-
-    // to make oceans not bumpy
-    if (noiseScale < 0.5) {
-        noiseScale = 0.5;
-    }
-
-    // to add normals:
-    float epsilon = .001;
-    vec3 noiseH = vec3(vs_Pos + (vs_Nor * noiseScale));
-
-    vec3 tangent = normalize(cross(vec3(0.0, 1.0, 0.0), vec3(vs_Nor)));
-    vec3 tangentPos = vec3(vs_Pos) + (tangent * epsilon);
-    float floatT = h(tangentPos);
-    vec3 gravUpT = normalize(tangentPos);
-    vec3 noiseT = gravUpT * floatT + gravUpT;
-
-    vec3 bitangent = normalize(cross(vec3(vs_Nor), tangent));
-    vec3 bitangentPos = vec3(vs_Pos) + (bitangent * epsilon);
-    float floatB = h(bitangentPos);
-    vec3 gravUpB = normalize(bitangentPos);
-    vec3 noiseB = gravUpB * floatB + gravUpB;
-
-    fs_Nor =vec4( normalize(cross(normalize(noiseH - noiseT), normalize(noiseH - noiseB))), 0.0);
-
-
-    vec3 noiseOffset = vec3(vs_Nor) * noiseScale;
-    vec3 noisymodelposition = modelposition.xyz + noiseOffset;
+    vec3 noisymodelposition = dp;
     gl_Position = u_ViewProj * vec4(noisymodelposition, 1.0);
 
     

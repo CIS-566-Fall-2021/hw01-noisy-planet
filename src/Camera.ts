@@ -27,6 +27,10 @@ class Camera {
     this.aspectRatio = aspectRatio;
   }
 
+  getEye() {
+    return this.controls.eye;
+  }
+
   updateProjectionMatrix() {
     mat4.perspective(this.projectionMatrix, this.fovy, this.aspectRatio, this.near, this.far);
   }

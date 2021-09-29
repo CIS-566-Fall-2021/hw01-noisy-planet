@@ -19,6 +19,7 @@ in vec4 fs_Pos;
 uniform float u_Time;
 uniform float u_Speed;
 uniform float u_Warming;
+uniform vec4 u_CameraEye;
 
 
 out vec4 out_Col; // This is the final output color that you will see on your
@@ -188,12 +189,39 @@ vec4 applyPalette(vec3 color, vec3 a, vec3 b, vec3 c, vec3 d) {
     return vec4(appliedCol[0], appliedCol[1], appliedCol[2], 1.f);
 }
 
+vec3 deform(vec3 p) {
+    float noiseScale = h(p);
+    // to make oceans not bumpy
+    if (noiseScale < 0.5) {
+        noiseScale = 0.5;
+    }
+
+    return (1.f + noiseScale) * p;
+}
+
 void main()
 {
-    vec4 CameraPos = vec4(0.0, 0.0, 5.0, 1.0);
+    vec3 noiseInput = vec3(fs_Pos[0], fs_Pos[1], fs_Pos[2]);
+    // to add normals:
+    vec3 dp = deform(noiseInput);
+    float epsilon = .0001;
+    vec3 noiseH = dp;
+
+    vec3 tangent = normalize(cross(vec3(0.0, 1.0, 0.0), vec3(fs_Nor)));
+    vec3 tangentPos = vec3(fs_Pos) + (tangent * epsilon);
+    //float floatT = h(tangentPos);
+    vec3 noiseT = deform(tangentPos);
+
+    vec3 bitangent = normalize(cross(vec3(fs_Nor), tangent));
+    vec3 bitangentPos = vec3(fs_Pos) + (bitangent * epsilon);
+    //float floatB = h(bitangentPos);
+    vec3 noiseB = deform(bitangentPos);
+
+    vec4 newNormal = vec4( normalize(cross((noiseH - noiseT), (noiseH - noiseB))), 0.0);
+
+
     // Material base color (before shading)
     vec4 diffuseColor = vec4(0.f, 1.f, 0.f, 1.f);
-    vec3 noiseInput = vec3(fs_Pos[0], fs_Pos[1], fs_Pos[2]);
 
     // Worley cells
     float h = 1.0 - h(noiseInput);
@@ -260,10 +288,8 @@ void main()
         diffuseColor = color4;     // snow
     }
 
-    // diffuseColor = applyPalette(vec3(diffuseColor), vec3(0.5), vec3(0.5), vec3(1.0), vec3(0.0, 0.33, 0.67));
-
         // Calculate the diffuse term for Lambert shading
-        float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
+        float diffuseTerm = dot(normalize(newNormal), normalize(fs_LightVec));
         // Avoid negative lighting values
         diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);
 
@@ -273,64 +299,22 @@ void main()
                                                             //to simulate ambient lighting. This ensures that faces that are not
                                                             //lit by our point light are not completely black.
 
-        // Compute final shaded color
-        out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
+        float spec;
+        vec3 h_vec;
 
-        if (isOcean) { 
-            // // Calculate view vector
-            // vec4 viewVec = vec4(normalize(vec3(CameraPos - fs_Pos)), 1.0);   
-
-            // // Calculate specular intensity
-            // vec4 hSpec = .5f * (viewVec + fs_LightVec);
-            // float exp = .5;
-            // float specIntensity = max(pow(dot(normalize(vec3(hSpec)), normalize(vec3(fs_Nor))), exp), 0.0);
+        if (isOcean) {   
+            vec3 v_vec = normalize(vec3(u_CameraEye) - vec3(fs_Pos));
+            vec3 l_vec = normalize(vec3(fs_LightVec) - vec3(fs_Pos));
+            h_vec = (v_vec + l_vec) / 2.0;
 
 
-            // // Calculate the diffuse term for Lambert shading
-            // float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
-            // // Avoid negative lighting values
-            // diffuseTerm = clamp(diffuseTerm, 0.0, 1.0);
+            float shininess = 5.0;
+            spec = 5.0 * max(pow(dot(normalize(h_vec), vec3(newNormal)), shininess), 0.0);
 
-            // float ambientTerm = 0.2;                    //Add a small float value to the color multiplier
-            //                                             //to simulate ambient lighting. This ensures that faces that are not
-            //                                             //lit by our point light are not completely black.
-
-
-            // float lightIntensity = diffuseTerm + ambientTerm + specIntensity;   
-            // // Compute final shaded color
-            // out_Col = diffuseColor * lightIntensity;   
-
-            // blinn phong another way
-            vec3 ambientColor = vec3(0.05, 0.15, 0.2);
-            vec3 specularColor = vec3(1.0, 1.0, 1.0);
-            vec3 norm = vec3(fs_Nor);
-            vec3 lightDir = vec3(fs_LightVec);
-            vec3 ta = vec3(0.0, 0.5, 0.0);
-            vec3 color;
-
-            vec3 cw = normalize(ta - vec3(CameraPos));
-            vec3 cu = normalize(cross(vec3(0.0, 1.0, 0.0), cw));
-            vec3 cv = normalize(cross(cw, cu));
-            mat3 cam = mat3(cu, cv, cw);
-
-            vec3 rd = cam * normalize(vec3(fs_Pos.xy, 1.5));
-
-            float occ = 0.5 + 0.5 * norm.y;
-
-            float amb = clamp(0.5 + 0.5 * norm.y, 0.0, 1.0);
-            float dif = clamp(dot(lightDir, norm), 0.0, 1.0);
-
-            vec3 h = normalize(-rd + lightDir);
-            float spe = pow(clamp(dot(h, norm), 0.0, 1.0), 64.0);
-
-        color = amb * ambientColor * occ;
-        color += dif * vec3(diffuseColor) * occ;
-        color += dif * spe * specularColor * occ;
-
-        vec3 gamma = vec3(1.0 / 1.5);
-    out_Col = vec4(pow(color, gamma), 1.0);
+            lightIntensity += spec;
         }
-}
+        
+        // Compute final shaded color
+        out_Col = vec4(diffuseColor.rgb * lightIntensity, 1.0f);
 
-// blinn phong on ocean
-// matcap everywhere else
+}

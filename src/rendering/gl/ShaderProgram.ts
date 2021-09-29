@@ -1,4 +1,4 @@
-import {vec4, mat4} from 'gl-matrix';
+import {vec3, vec4, mat4} from 'gl-matrix';
 import Drawable from './Drawable';
 import {gl} from '../../globals';
 
@@ -36,6 +36,7 @@ class ShaderProgram {
   unifTime: WebGLUniformLocation;
   unifSpeed: WebGLUniformLocation;
   unifWarming: WebGLUniformLocation;
+  unifCameraEye: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -62,6 +63,7 @@ class ShaderProgram {
     this.unifTime       = gl.getUniformLocation(this.prog, "u_Time");
     this.unifSpeed      = gl.getUniformLocation(this.prog, "u_Speed");
     this.unifWarming    = gl.getUniformLocation(this.prog, "u_Warming");
+    this.unifCameraEye  = gl.getUniformLocation(this.prog, "u_CameraEye");
 
   }
 
@@ -90,6 +92,13 @@ class ShaderProgram {
     this.use();
     if (this.unifViewProj !== -1) {
       gl.uniformMatrix4fv(this.unifViewProj, false, vp);
+    }
+  }
+
+  setCameraEye(eye: vec4) {
+    this.use();
+    if (this.unifCameraEye !== -1) {
+      gl.uniform4fv(this.unifCameraEye, eye);
     }
   }
 

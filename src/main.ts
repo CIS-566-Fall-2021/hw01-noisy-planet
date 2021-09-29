@@ -174,7 +174,7 @@ function main() {
       prevColor, color_2, color_3, color_4, color_5, prevTime, [
       icosphere,
       // moon
-      // cube
+      //cube
       // square,
     ]);
 
