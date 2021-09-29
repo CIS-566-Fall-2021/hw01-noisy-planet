@@ -1,6 +1,8 @@
 # CIS 566 Project 1: Noisy Planets
 
-**Author: Ashley Alexander-Lee**
+**Author: Ashley Alexander-Lee** (asalexan)
+
+All credit for the 3D worley and perlin noise base code goes to Adam Mally and the 560/561 slides. The ease-in and ease-out functions were referenced from easings.net, and the bias and gain functions were detailed in the 566 lecture slides.
 
 ### Description
 This project involved generating a procedural planet with WebGL and Typescript using noise and transition functions. A live demo can be found at https://asalexan.github.io/hw01-noisy-planet/ . If you wish to try it out locally, you can simply clone the repository, run `npm i` to install dependencies, and type `npm start` to run it on a local host.
