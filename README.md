@@ -1,4 +1,4 @@
-# Serena Gandhi (gserena), Noisy Planets
+# Serena Gandhi (gserena), Noisy Planets 
 # Link:
 https://gserena01.github.io/hw01-noisy-planet/
 # Images:
