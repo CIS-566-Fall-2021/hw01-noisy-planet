@@ -5,8 +5,18 @@ PennKey Emma20
 
 Resources Used
 http://dev.thi.ng/gradients/ - for my cosine color palettes
+
 https://www.shadertoy.com/view/ssXSzX https://www.shadertoy.com/view/sd2Gzd-my old shader toy shaders for noise functions
+
 https://thebookofshaders.com/12/ -referenced books of shaders when tweaking my noise
+
+//I currently do not have a link because my gh-pages is not updating
+
+![](images/planet1.png)
+
+![](images/planet2.png)
+
+
 
 
 I created a stylized earth like planet with a purple moon. My planet has four different regions, an ocean region with islands, a hill region, a plateau region, and a moutian region. I used different forms of 3D perlin noise to create the plateau and island biomes, with the island biome biased toward the relatively flatness of the ocean, and different version of 3D fbm for the hills and moutains. I then bilinearly interpolated between the four biomes to get the height at each point on the planet. I used a 2D fbm funciton to interpolate between all of the values. The x of the 2D fbm was used to interpolate between the moutains / hills and then the ocean/ pleateau. The y of the fbm was then used to interpolate between the resulting two values. This resulted in having island mostly at the bottom of the planet and hills and moutains along the top and middle. I used the height of the point relative to the center of the sphere to determine the color of the point and break the biomes up by color. I did not blocks of color separating the hill and moutian biome so I interpolated between the hill color and th emoutain color in the areas in between. I also used an fbm based cosine color palette for the green color and a another fbm function for the base of a color cosine palette for the coean. The oean color also changes based off of a time variable. Most of the planet is using lambert shading but the snow capped moutains have blinn phong applied and the ocean is an iridescent shader that is being used as the color term for lambert shading so that shadows are still applied. I also created a small moon for my planet and used fbm for the creaters and perlin noise as the base of a purple cosine color palette for the color. The user can change the size of the moon and also change the color of not only the light but also the shadows. I think shadow color is a very important artistic aspect that is often overlooked. 
