@@ -20,6 +20,9 @@ https://gserena01.github.io/hw01-noisy-planet/
 - http://demofox.org/biasgain.html for bias and gain functions used to transition between biomes
 - https://www.iquilezles.org/www/articles/functions/functions.htm for power curve and impulse functions used to create seasons and thresholds on biome height
 
+
+
+# 
 # Project Description:
 
 
