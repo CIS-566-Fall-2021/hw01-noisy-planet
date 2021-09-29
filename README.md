@@ -2,6 +2,8 @@
 # Link:
 https://gserena01.github.io/hw01-noisy-planet/
 # Images:
+![image](https://user-images.githubusercontent.com/60444726/135357336-64d4801a-70c1-4156-8b89-a4700512aff5.png)
+
 # Overview:
 - five biomes (distinguished by color): water, sand, grass (green and burnt sienna), rock, and snow
 - uses gain and bias to transition between biomes
