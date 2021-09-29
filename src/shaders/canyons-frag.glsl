@@ -135,5 +135,11 @@ void main()
                                                             //lit by our point light are not completely black.
         // Compute final shaded color
         float noise = noiseFunction(fs_Nor.xyz * 3.f);
-        out_Col = vec4(cosinePalette(noise), diffuseColor.a);
+        if (noise > 0.1f) {
+            out_Col = vec4(cosinePalette(noise), diffuseColor.a);
+        } else {
+            //out_Col = vec4(cosinePalette(noise / 2.f), diffuseColor.a);
+            out_Col = vec4(0.f, 0.f, 0.f, diffuseColor.a);
+        }
+        out_Col = vec4(cosinePalette(noise) * lightIntensity, diffuseColor.a);
 }

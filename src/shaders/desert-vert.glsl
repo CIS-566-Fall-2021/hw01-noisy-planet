@@ -19,6 +19,8 @@ uniform mat4 u_ViewProj;    // The matrix that defines the camera's transformati
                             // We've written a static matrix for you to use for HW2,
                             // but in HW3 you'll have to generate one yourself
 
+uniform highp int u_Time;
+
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
 in vec4 vs_Nor;             // The array of vertex normals passed to the shader
@@ -33,104 +35,64 @@ out vec4 fs_Pos;
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
 
+vec3 noise3D(vec3 p) {
+    float val1 = fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 43758.5453);
 
-// Used https://github.com/yiwenl/glsl-fbm/blob/master/3d.glsl implementation of 3D FBM
-float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
-vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
-vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
+    float val2 = fract(sin((dot(p, vec3(191.999, 127.1, 311.7)))) * 3758.5453);
 
-float noise(vec3 p){
-    vec3 a = floor(p);
-    vec3 d = p - a;
-    d = d * d * (3.0 - 2.0 * d);
+    float val3 = fract(sin((dot(p, vec3(311.7, 191.999, 127.1)))) * 758.5453);
 
-    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
-    vec4 k1 = perm(b.xyxy);
-    vec4 k2 = perm(k1.xyxy + b.zzww);
-
-    vec4 c = k2 + a.zzzz;
-    vec4 k3 = perm(c);
-    vec4 k4 = perm(c + 1.0);
-
-    vec4 o1 = fract(k3 * (1.0 / 41.0));
-    vec4 o2 = fract(k4 * (1.0 / 41.0));
-
-    vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
-    vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
-
-    return o4.y * d.y + o4.x * (1.0 - d.y);
+    return vec3(val1, val2, val3);
 }
 
-float fbm(vec3 x) {
-	float v = 0.0;
-	float a = 0.5;
-	vec3 shift = vec3(100);
-	for (int i = 0; i < 5; ++i) {
-		v += a * noise(x);
-		x = x * 2.0 + shift;
-		a *= 0.5;
-	}
-	return v;
-}
-
-float noise1D( vec2 p ) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) *
-                 43758.5453);
-}
-
-float interpNoise2D(float x, float y) {
+vec3 interpNoise3D(float x, float y, float z) {
     int intX = int(floor(x));
     float fractX = fract(x);
     int intY = int(floor(y));
     float fractY = fract(y);
+    int intZ = int(floor(z));
+    float fractZ = fract(z);
 
-    float v1 = noise1D(vec2(intX, intY));
-    float v2 = noise1D(vec2(intX + 1, intY));
-    float v3 = noise1D(vec2(intX, intY + 1));
-    float v4 = noise1D(vec2(intX + 1, intY + 1));
+    vec3 v1 = noise3D(vec3(intX, intY, intZ));
+    vec3 v2 = noise3D(vec3(intX + 1, intY, intZ));
+    vec3 v3 = noise3D(vec3(intX, intY + 1, intZ));
+    vec3 v4 = noise3D(vec3(intX + 1, intY + 1, intZ));
 
-    float i1 = mix(v1, v2, fractX);
-    float i2 = mix(v3, v4, fractX);
-    return mix(i1, i2, fractY);
+    vec3 v5 = noise3D(vec3(intX, intY, intZ + 1));
+    vec3 v6 = noise3D(vec3(intX + 1, intY, intZ + 1));
+    vec3 v7 = noise3D(vec3(intX, intY + 1, intZ + 1));
+    vec3 v8 = noise3D(vec3(intX + 1, intY + 1, intZ + 1));
+
+    vec3 i1 = mix(v1, v2, fractX);
+    vec3 i2 = mix(v3, v4, fractX);
+
+    vec3 i3 = mix(i1, i2, fractY);
+
+    vec3 i4 = mix(v5, v6, fractX);
+    vec3 i5 = mix(v7, v8, fractX);
+
+    vec3 i6 = mix(i4, i5, fractY);
+
+    vec3 i7 = mix(i3, i6, fractZ);
+
+    return i7;
 }
 
+vec3 fbm(float x, float y, float z) {
+    vec3 total = vec3(0.f, 0.f, 0.f);
 
-float fbm(float x, float y) {
-    float total = 0.0;
     float persistence = 0.5f;
-    int octaves = 4;
+    int octaves = 6;
 
-    for(int i = 1; i <= octaves; i++) {
+    for(int i = 1; i <= octaves; i++)
+    {
         float freq = pow(2.f, float(i));
         float amp = pow(persistence, float(i));
 
-        total += interpNoise2D(x * freq,
-                               y * freq) * amp;
+        total += interpNoise3D(x * freq, y * freq, z * freq) * amp;
     }
+
     return total;
-}
-
-vec2 random2( vec2 p ) {
-    return fract(sin(vec2(dot(p, vec2(127.1, 311.7)),
-                 dot(p, vec2(269.5,183.3))))
-                 * 43758.5453);
-}
-
-float worleyNoise(vec2 uv) {
-    uv *= 10.0; 
-    vec2 uvInt = floor(uv);
-    vec2 uvFract = fract(uv);
-    float minDist = 1.0;
-    for(int y = -1; y <= 1; ++y) {
-        for(int x = -1; x <= 1; ++x) {
-            vec2 neighbor = vec2(float(x), float(y));
-            vec2 point = random2(uvInt + neighbor); 
-            vec2 diff = neighbor + point - uvFract;
-            float dist = length(diff);
-            minDist = min(minDist, dist);
-        }
-    }
-    return minDist;
 }
 
 vec3 random3( vec3 p ) {
@@ -156,7 +118,7 @@ float surflet(vec3 p, vec3 gridPoint) {
     return height * t.x * t.y * t.z;
 }
 
-float perlinNoise3D(vec3 p) {
+float perlin(vec3 p) {
 	float surfletSum = 0.f;
 	// Iterate over the four integer corners surrounding uv
 	for(int dx = 0; dx <= 1; ++dx) {
@@ -169,8 +131,26 @@ float perlinNoise3D(vec3 p) {
 	return surfletSum;
 }
 
-float noiseFunction(vec3 p) {
-    return 2.f * fbm(p / 2.0f);
+float bias(float time, float bias) {
+    return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
+}
+
+float gain(float time, float gain) {
+    if (time < 0.5) {
+        return bias(time * 2.0, gain) / 2.0;
+    } else {
+        return bias(time * 2.0 - 1.0, 1.0 - gain) / 2.0 + 0.5;
+    }
+}
+
+// Cosine palette variables
+const vec3 a = vec3(0.5, 0.5, 0.5);
+const vec3 b = vec3(0.5, 0.5, 0.5);
+const vec3 c = vec3(1.0, 1.0, 1.0);
+const vec3 d = vec3(0.0, 0.1, 0.2);
+
+vec3 cosinePalette(float t) {
+    return a + b * cos(6.2831 * (c * t + d));
 }
 
 void main()
@@ -178,24 +158,41 @@ void main()
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
 
     mat3 invTranspose = mat3(u_ModelInvTr);
+    fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);          // Pass the vertex normals to the fragment shader for interpolation.
+                                                            // Transform the geometry's normals by the inverse transpose of the
+                                                            // model matrix. This is necessary to ensure the normals remain
+                                                            // perpendicular to the surface after the surface is transformed by
+                                                            // the model matrix.
 
-    float noiseFactor = noiseFunction(vs_Nor.xyz);
-    
-    vec4 modelposition = u_Model * vs_Pos + vs_Nor * vec4(noiseFactor);   // Temporarily store the transformed vertex positions for use below
-    fs_Pos = vs_Pos + vs_Nor * vec4(noiseFactor);
+
+    vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
 
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
 
-    // gl_Position is a built-in variable of OpenGL which is
-    // used to render the final positions of the geometry's vertices
-    gl_Position = u_ViewProj * modelposition;
+    gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is
+                                             // used to render the final positions of the geometry's vertices
 
-    float epsilon = 0.05f;
-    vec3 dx = vec3(epsilon, 0.f, 0.f);
-    vec3 dy = vec3(0.f, epsilon, 0.f);
-    vec3 dz = vec3(0.f, 0.f, epsilon);
-    float norX = noiseFunction(fs_Pos.xyz + dx) - noiseFunction(fs_Pos.xyz - dx);
-    float norY = noiseFunction(fs_Pos.xyz + dy) - noiseFunction(fs_Pos.xyz - dy);
-    float norZ = noiseFunction(fs_Pos.xyz + dz) - noiseFunction(fs_Pos.xyz - dz);
-    fs_Nor = vec4(invTranspose * vec3(norX, norY, norZ), 0.f);
+    // BEGIN TINKERING
+
+    vec3 noiseInput = modelposition.xyz;
+    noiseInput *= 2.f;
+
+    // Animation!
+    //noiseInput += float(u_Time) * 0.001;
+
+    vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
+
+    float noiseScale = noise.r;
+    if (noise.r < 0.5f) {
+        noiseScale = 1.1f * perlin(modelposition.xyz * 8.f);
+    }
+    vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
+    vec3 noisyModelPosition = modelposition.xyz + offsetAmount;
+
+    gl_Position = u_ViewProj * vec4(noisyModelPosition, 1.0);
+
+    // END TINKERING
+
+
+    fs_Pos = vs_Pos;
 }

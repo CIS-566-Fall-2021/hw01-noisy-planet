@@ -71,8 +71,8 @@ function main() {
     gl.enable(gl.DEPTH_TEST);
 
   const lambert = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/earth-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/earth-frag.glsl')),
+    new Shader(gl.VERTEX_SHADER, require('./shaders/biome3-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/biome3-frag.glsl')),
   ]);
 
   const lambertDeform = new ShaderProgram([

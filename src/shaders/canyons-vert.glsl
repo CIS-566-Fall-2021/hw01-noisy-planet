@@ -182,7 +182,7 @@ float gain (float g, float t) {
 }
 
 float noiseFunction(vec3 p) {
-    return bias(0.8f, 2.f) * -0.1f * abs(5.f * perlinNoise3D(5.f * fbm(0.5f * p) * p));
+    return bias(0.8f, 2.f) * -0.2f * abs(5.f * perlinNoise3D(5.f * fbm(0.5f * p) * p));
 }
 
 void main()
