@@ -33,6 +33,7 @@ class ShaderProgram {
   unifLightSpeed: WebGLUniformLocation;
   unifMountainHeight: WebGLUniformLocation;
   unifCamPos :WebGLUniformLocation;
+  unifFlowerPatches : WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -55,6 +56,7 @@ class ShaderProgram {
     this.unifTime        = gl.getUniformLocation(this.prog, "u_Time")
     this.unifLightSpeed = gl.getUniformLocation(this.prog, "u_LightSpeed");
     this.unifMountainHeight = gl.getUniformLocation(this.prog, "u_MountainHeight");
+    this.unifFlowerPatches = gl.getUniformLocation(this.prog, "u_Flower");
     this.unifCamPos = gl.getUniformLocation(this.prog, "u_CameraPos");
 
   }
@@ -113,6 +115,13 @@ class ShaderProgram {
     this.use();
     if(this.unifMountainHeight != -1) {
       gl.uniform1f(this.unifMountainHeight, mountain)
+    }
+  }
+  
+  setFlower(flower: number) {
+    this.use();
+    if(this.unifFlowerPatches != -1) {
+      gl.uniform1f(this.unifFlowerPatches, flower)
     }
   }
   

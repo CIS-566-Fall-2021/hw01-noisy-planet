@@ -45,11 +45,13 @@ function main() {
   const gui = new DAT.GUI();
   gui.add(controls, 'tesselations', 0, 8).step(1);
   gui.add(controls, 'Load Scene');
-  let colourController = gui.addColor(controls, 'palette')
+  let colourController = gui.addColor(controls, 'palette');
   var mountains = {height : 1}
-  gui.add(mountains, 'height', 0, 5).name('Mountain Height');
+  gui.add(mountains, 'height', 0, 5).name('Land Distribution');
   var lightSpeed = {lightSpeed : 5}
-  gui.add(lightSpeed, 'lightSpeed', 0, 5).name('Light Speed')
+  gui.add(lightSpeed, 'lightSpeed', 0, 5).name('Light Speed');
+  var flowerPatches = {amt: 1}
+  gui.add(flowerPatches, 'amt', 0, 2).name('Flower Patches');
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
   const gl = <WebGL2RenderingContext> canvas.getContext('webgl2');
@@ -101,36 +103,6 @@ function main() {
       icosphere.create();
     }
 
-    //lambert render
-    // colourController.onChange( function( colour ) {
-    //   let col = vec4.fromValues(colour[0] / 255.0, 
-    //                             colour[1] / 255.0, 
-    //                             colour[2] / 255.0, 1)
-    //   lambert.setGeometryColor(col)
-    // })
-    // lambert.setTime(time);
-    // time++;
-    // renderer.render(camera, lambert, [
-    //   // icosphere,
-    //   // square,
-    //   cube
-    // ]);
-    
-    //custom noise render
-    // colourController.onChange( function( colour ) {
-    //   let col = vec4.fromValues(colour[0] / 255.0, 
-    //                             colour[1] / 255.0, 
-    //                             colour[2] / 255.0, 1)
-    //   customNoise.setGeometryColor(col)
-    // })
-    // customNoise.setTime(time);
-    // time++;
-    // renderer.render(camera, customNoise, [
-    //   icosphere,
-    //   // square,
-    //   // cube
-    // ]);
-
     //custom noise render
     colourController.onChange(function (colour) {
       let col = vec4.fromValues(colour[0] / 255.0,
@@ -144,7 +116,7 @@ function main() {
       icosphere,
       // square,
       // cube
-    ],lightSpeed.lightSpeed, mountains.height);
+    ],lightSpeed.lightSpeed, mountains.height, flowerPatches.amt);
 
     stats.end();
 

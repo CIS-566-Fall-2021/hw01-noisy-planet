@@ -24,6 +24,8 @@ uniform highp float u_LightSpeed;
 
 uniform highp float u_MountainHeight;
 
+uniform highp float u_Flower;
+
 uniform vec4 u_CamPos;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
@@ -38,6 +40,7 @@ out vec4 fs_Col;            // The color of each vertex. This is implicitly pass
 out vec4 fs_Pos;
 out float biome_type;
 out vec4 modelposition;
+out float flower_type;
 
 vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
@@ -154,39 +157,6 @@ float fbm(float x, float y, float z, float octaves) {
 }
 
 
-// Takes in a position vec3, returns a vec3, to be used below as a color
-vec3 noise3D( vec3 p ) 
-{
-    float val1 = fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 43758.5453);
-
-    float val2 = fract(sin((dot(p, vec3(191.999, 127.1, 311.7)))) * 3758.5453);
-
-    float val3 = fract(sin((dot(p, vec3(311.7, 191.999, 127.1)))) * 758.5453);
-
-    return vec3(val1, val2, val3);
-}
-
-
-
-// 3D Fractal Brownian Motion
-vec3 fbm3D(float x, float y, float z) 
-{
-    vec3 total = vec3(0.f, 0.f, 0.f);
-
-    float persistence = 0.5f;
-    int octaves = 8;
-
-    for(int i = 1; i <= octaves; i++) 
-    {
-        float freq = pow(2.f, float(i));
-        float amp = pow(persistence, float(i));
-
-        total += interpNoise3D(x * freq, y * freq, z * freq) * amp;
-    }
-    
-    return total;
-}
-
 
 float GetBias(float time, float bias)
 {
@@ -214,9 +184,6 @@ vec4 transformToWorld(vec4 nor) {
   return vec4(normalize(vec3(transform * nor)), 0.0); 
 } 
 
-float iceNoise(vec4 p, float factor) {
-    return summedPerlin(p * factor);
-}
 
 float mountainNoise(vec4 p, float factor) {
     return summedPerlin(p * factor);
@@ -267,6 +234,7 @@ vec4 computeTerrain() {
     vec4 desertElevation = vs_Pos + max(vec4(0.), vs_Nor * summedPerlin(vs_Pos * 2.0));
     vec4 mountainElevation = vs_Pos + max(vec4(0.), vs_Nor * mountainNoise(vs_Pos, 3.0));
     vec4 iceElevation = vs_Pos + max(vec4(0.), vs_Nor * mountainNoise(vs_Pos, 4.0));
+    
 
     if (biomeMap < 0.2) { // water
         fs_Nor = vs_Nor;
@@ -274,7 +242,7 @@ vec4 computeTerrain() {
     } else if (biomeMap < 0.3) { // grass
         float x = GetBias((biomeMap - 0.2) / 0.1, 0.3);
         noisePos = mix(vs_Pos, grassElevation, x);
-        fs_Nor = transformToWorld(normalize(mountainNormals(vs_Pos, 1.0)));
+        fs_Nor = transformToWorld(normalize(mountainNormals(vs_Pos, 1.1)));
         biome_type = 1.0;
     } else if (biomeMap < 0.4) { // desert
         float x = GetBias((biomeMap - 0.3) / 0.1, 0.7);
@@ -291,6 +259,11 @@ vec4 computeTerrain() {
         noisePos = mix(mountainElevation, iceElevation, x);
         fs_Nor = transformToWorld(normalize(mountainNormals(vs_Pos, 4.0)));
         biome_type = 4.0;
+    }
+
+    float flowerMap = pow(fbm(tInput.x, tInput.y, tInput.z, 6.0),5.f) * u_Flower;
+    if (flowerMap > 0.1) {
+      flower_type = 1.0;
     }
     
     return noisePos;
@@ -315,10 +288,10 @@ void main()
 
     //rotate the light source
 
-    float angle =  float(u_Time) * 0.002 * u_LightSpeed;
-    vec4 c0 = vec4(cos(angle), 0, -1.*sin(angle), 0);
+    float a =  float(u_Time) * 0.002 * u_LightSpeed;
+    vec4 c0 = vec4(cos(a), 0, -1.*sin(a), 0);
     vec4 c1 = vec4(0, 1, 0, 0);
-    vec4 c2 = vec4(sin(angle), 0, cos(angle), 0);
+    vec4 c2 = vec4(sin(a), 0, cos(a), 0);
     vec4 c3 = vec4(0, 0, 0, 1);
     mat4 rotate = mat4(c0, c1, c2, c3);
     lightPos = rotate * lightPos;

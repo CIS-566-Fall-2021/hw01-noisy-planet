@@ -23,7 +23,7 @@ class OpenGLRenderer {
   }
 
   render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>,
-    lightSpeed: number, mountains: number) {
+    lightSpeed: number, mountains: number, flowerPatches: number) {
     let model = mat4.create();
     let viewProj = mat4.create();
 
@@ -33,6 +33,7 @@ class OpenGLRenderer {
     prog.setViewProjMatrix(viewProj);
     prog.setMountain(mountains);
     prog.setLightSpeed(lightSpeed);
+    prog.setFlower(flowerPatches);
     prog.setCamPos(vec4.fromValues(camera.position[0], camera.position[1], camera.position[2], 1.));
     for (let drawable of drawables) {
       prog.draw(drawable);
