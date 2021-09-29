@@ -138,16 +138,15 @@ vec3 rgb(float r, float g, float b) {
 }
 
 // Cosine palette variables
-const vec3 a = vec3(-0.311, -1.441, 0.5484);
-const vec3 b = vec3(-2.521, -2.261, -3.141);
-const vec3 c = vec3(0.3184, -1.131, 1.0184);
-const vec3 d = vec3(0.6884, 0.3184, 0.7684);
+const vec3 a = vec3(1.5084, -0.541, -0.241);
+const vec3 b = vec3(1.7984, -1.351, 1.0384);
+const vec3 c = vec3(0.1784, 0.2884, -0.571);
+const vec3 d = vec3(-0.761, 1.5384, -2.061);
 
-// Cool
-// const vec3 a = vec3(0.6484, -1.441, 0.5484);
-// const vec3 b = vec3(-1.901, -3.141, -2.581);
-// const vec3 c = vec3(0.3184, -1.131, 1.0184);
-// const vec3 d = vec3(0.6884, 0.3184, 0.7684);
+// const vec3 a = vec3(-0.311, -1.441, 0.5484);
+// const vec3 b = vec3(-2.201, -2.261, 0.4384);
+// const vec3 c = vec3(0.3184, -1.131, 1);
+// const vec3 d = vec3(0.6084, -0.531, 0.2584);
 
 vec3 cosinePalette(float t) {
     return a + b * cos(6.2831 * (c * t + d));
@@ -176,7 +175,7 @@ void main()
 
         vec3 noiseInput = fs_Pos.xyz;
         // Adjust this to change continent size
-        noiseInput *= 4.f;
+        noiseInput *= 3.f;
 
         // Animation!
         //noiseInput += float(u_Time) * 0.001;

@@ -71,23 +71,23 @@ function main() {
     gl.enable(gl.DEPTH_TEST);
 
   const lambert = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/biome3-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/biome3-frag.glsl')),
+    new Shader(gl.VERTEX_SHADER, require('./shaders/biome4-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/biome4-frag.glsl')),
   ]);
 
   const lambertDeform = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/canyons-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/canyons-frag.glsl')),
+    new Shader(gl.VERTEX_SHADER, require('./shaders/desert-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/desert-frag.glsl')),
   ]);
 
   const noise = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/mountains-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/mountains-frag.glsl')),
+    new Shader(gl.VERTEX_SHADER, require('./shaders/earth2-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/earth2-frag.glsl')),
   ]);
 
   const noiseDeform = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/deform-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/noise-frag.glsl')),
+    new Shader(gl.VERTEX_SHADER, require('./shaders/biome3-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/biome3-frag.glsl')),
   ]);
 
   currShader = lambert;

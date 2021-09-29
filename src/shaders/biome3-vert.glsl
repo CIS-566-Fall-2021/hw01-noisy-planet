@@ -175,7 +175,7 @@ void main()
     // BEGIN TINKERING
 
     vec3 noiseInput = modelposition.xyz;
-    noiseInput *= 4.f;
+    noiseInput *= 3.f;
 
     // Animation!
     //noiseInput += float(u_Time) * 0.001;
@@ -183,11 +183,13 @@ void main()
     vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 
     float noiseScale = noise.r;
-    if (noise.r > 0.65f) {
+    if (noise.r > 0.5f) {
         noiseScale *= 1.1f;
     }
-    if (noise.r < 0.3f) {
-        noiseScale /= 3.f;
+    if (noise.r < 0.4f) {
+        noiseInput += float(u_Time) * 0.001;
+        noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
+        noiseScale = noise.r / 2.f;
     }
     vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
     vec3 noisyModelPosition = modelposition.xyz + offsetAmount;

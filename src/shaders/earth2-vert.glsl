@@ -95,6 +95,42 @@ vec3 fbm(float x, float y, float z) {
     return total;
 }
 
+vec3 random3( vec3 p ) {
+    return fract(sin(vec3(dot(p,vec3(127.1, 311.7, 147.6)),
+                          dot(p,vec3(269.5, 183.3, 221.7)),
+                          dot(p, vec3(420.6, 631.2, 344.2))
+                    )) * 43758.5453);
+}
+
+float surflet(vec3 p, vec3 gridPoint) {
+    // Compute the distance between p and the grid point along each axis, and warp it with a
+    // quintic function so we can smooth our cells
+    vec3 t2 = abs(p - gridPoint);
+    vec3 t = vec3(1.f) - 6.f * pow(t2, vec3(5.f)) + 15.f * pow(t2, vec3(4.f)) - 10.f * pow(t2, vec3(3.f));
+    // Get the random vector for the grid point (assume we wrote a function random2
+    // that returns a vec2 in the range [0, 1])
+    vec3 gradient = random3(gridPoint) * 2. - vec3(1., 1., 1.);
+    // Get the vector from the grid point to P
+    vec3 diff = p - gridPoint;
+    // Get the value of our height field by dotting grid->P with our gradient
+    float height = dot(diff, gradient);
+    // Scale our height field (i.e. reduce it) by our polynomial falloff function
+    return height * t.x * t.y * t.z;
+}
+
+float perlin(vec3 p) {
+	float surfletSum = 0.f;
+	// Iterate over the four integer corners surrounding uv
+	for(int dx = 0; dx <= 1; ++dx) {
+		for(int dy = 0; dy <= 1; ++dy) {
+			for(int dz = 0; dz <= 1; ++dz) {
+				surfletSum += surflet(p, floor(p) + vec3(dx, dy, dz));
+			}
+		}
+	}
+	return surfletSum;
+}
+
 float bias(float time, float bias) {
     return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
 }
@@ -107,6 +143,11 @@ float gain(float time, float gain) {
     }
 }
 
+float impulse(float k, float x) {
+    float h = k * x;
+    return h * exp(1.f - h);
+}
+
 // Cosine palette variables
 const vec3 a = vec3(0.5, 0.5, 0.5);
 const vec3 b = vec3(0.5, 0.5, 0.5);
@@ -115,6 +156,38 @@ const vec3 d = vec3(0.0, 0.1, 0.2);
 
 vec3 cosinePalette(float t) {
     return a + b * cos(6.2831 * (c * t + d));
+}
+
+vec4 when_eq(vec4 x, vec4 y) {
+  return 1.0 - abs(sign(x - y));
+}
+
+vec4 when_neq(vec4 x, vec4 y) {
+  return abs(sign(x - y));
+}
+
+vec4 when_gt(vec4 x, vec4 y) {
+  return max(sign(x - y), 0.0);
+}
+
+vec4 when_lt(vec4 x, vec4 y) {
+  return max(sign(y - x), 0.0);
+}
+
+float when_lt(float x, float y) {
+  return max(sign(y - x), 0.0);
+}
+
+vec4 when_ge(vec4 x, vec4 y) {
+  return 1.0 - when_lt(x, y);
+}
+
+float when_ge(float x, float y) {
+  return 1.0 - when_lt(x, y);
+}
+
+vec4 when_le(vec4 x, vec4 y) {
+  return 1.0 - when_gt(x, y);
 }
 
 void main()
@@ -146,10 +219,13 @@ void main()
 
     vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 
-    float noiseScale = noise.r;
-    if (noise.r < 0.5f) {
-        noiseScale = 0.55f;
-    }
+    float timeScale = impulse(0.1f, cos(float(u_Time) * 0.01f) * 0.5f + 0.5f);
+    noiseInput += timeScale;
+    vec3 noiseTime = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
+
+    float noiseScale = noise.r * when_ge(noise.r, 0.5f) +
+                       0.46f * when_ge(noise.r, 0.4f) * when_lt(noise.r, 0.5f) +
+                       (0.25f + noiseTime.r * 0.5f) * when_lt(noise.r, 0.4f);
     vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
     vec3 noisyModelPosition = modelposition.xyz + offsetAmount;
 

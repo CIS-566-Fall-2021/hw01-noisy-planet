@@ -143,15 +143,6 @@ float gain(float time, float gain) {
     }
 }
 
-float cubicPulse(float c, float w, float x) {
-    x = abs(x - c);
-    if (x > w) {
-        return 0.f;
-    }
-    x /= w;
-    return 1.f - x * x * (3.f * 2.f * x);
-}
-
 // Cosine palette variables
 const vec3 a = vec3(0.5, 0.5, 0.5);
 const vec3 b = vec3(0.5, 0.5, 0.5);
@@ -178,15 +169,7 @@ vec4 when_lt(vec4 x, vec4 y) {
   return max(sign(y - x), 0.0);
 }
 
-float when_lt(float x, float y) {
-  return max(sign(y - x), 0.0);
-}
-
 vec4 when_ge(vec4 x, vec4 y) {
-  return 1.0 - when_lt(x, y);
-}
-
-float when_ge(float x, float y) {
   return 1.0 - when_lt(x, y);
 }
 
@@ -216,19 +199,20 @@ void main()
     // BEGIN TINKERING
 
     vec3 noiseInput = modelposition.xyz;
-    noiseInput *= 2.f;
+    noiseInput *= 2.f * perlin(fbm(modelposition.x / 3.f, modelposition.y / 5.f, modelposition.z / 5.f) * 5.f);
 
     // Animation!
-    noiseInput += float(u_Time) * 0.001;
+    //noiseInput += float(u_Time) * 0.001;
 
     vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 
     float noiseScale = noise.r;
-    float timeScale = cubicPulse(0.f, 5.f, cos(float(u_Time) * 0.01) * 2.f);
-
-    noiseScale = 1.1f * perlin((modelposition.xyz + timeScale) * 10.f) * when_lt(noise.r, 0.5f) +
-                noise.r * when_ge(noise.r, 0.5f);
-                
+    // if (noise.r > 0.65f) {
+    //     noiseScale *= 1.1f;
+    // }
+    if (noise.r < 0.5f) {
+        noiseScale = 0.3f + 0.2f * noise.r;
+    }
     vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
     vec3 noisyModelPosition = modelposition.xyz + offsetAmount;
 

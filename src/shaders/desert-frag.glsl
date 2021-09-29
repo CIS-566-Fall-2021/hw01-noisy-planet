@@ -147,6 +147,30 @@ vec3 cosinePalette(float t) {
     return a + b * cos(6.2831 * (c * t + d));
 }
 
+vec4 when_eq(vec4 x, vec4 y) {
+  return 1.0 - abs(sign(x - y));
+}
+
+vec4 when_neq(vec4 x, vec4 y) {
+  return abs(sign(x - y));
+}
+
+vec4 when_gt(vec4 x, vec4 y) {
+  return max(sign(x - y), 0.0);
+}
+
+vec4 when_lt(vec4 x, vec4 y) {
+  return max(sign(y - x), 0.0);
+}
+
+vec4 when_ge(vec4 x, vec4 y) {
+  return 1.0 - when_lt(x, y);
+}
+
+vec4 when_le(vec4 x, vec4 y) {
+  return 1.0 - when_gt(x, y);
+}
+
 void main()
 {
     // Material base color (before shading)
@@ -173,7 +197,7 @@ void main()
         noiseInput *= 2.f;
 
         // Animation!
-        //noiseInput += float(u_Time) * 0.001;
+        noiseInput += float(u_Time) * 0.001;
 
         vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 
