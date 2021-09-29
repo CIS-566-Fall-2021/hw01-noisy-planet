@@ -30,6 +30,9 @@ class ShaderProgram {
   unifViewProj: WebGLUniformLocation;
   unifColor: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
+  unifLightSpeed: WebGLUniformLocation;
+  unifMountainHeight: WebGLUniformLocation;
+  unifCamPos :WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -50,6 +53,10 @@ class ShaderProgram {
     this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
     this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
     this.unifTime        = gl.getUniformLocation(this.prog, "u_Time")
+    this.unifLightSpeed = gl.getUniformLocation(this.prog, "u_LightSpeed");
+    this.unifMountainHeight = gl.getUniformLocation(this.prog, "u_MountainHeight");
+    this.unifCamPos = gl.getUniformLocation(this.prog, "u_CameraPos");
+
   }
 
   use() {
@@ -91,6 +98,28 @@ class ShaderProgram {
     this.use();
     if (this.unifColor !== -1) {
       gl.uniform1i(this.unifTime, time);
+    }
+  }
+
+  setLightSpeed(ls: number) {
+    this.use();
+    if(this.unifLightSpeed != -1) {
+      gl.uniform1f(this.unifLightSpeed, ls)
+    }
+  }
+
+
+  setMountain(mountain: number) {
+    this.use();
+    if(this.unifMountainHeight != -1) {
+      gl.uniform1f(this.unifMountainHeight, mountain)
+    }
+  }
+  
+  setCamPos(pos: vec4) {
+    this.use();
+    if (this.unifCamPos !== -1) {
+      gl.uniform4fv(this.unifCamPos, pos);
     }
   }
 

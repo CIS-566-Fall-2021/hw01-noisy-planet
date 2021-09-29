@@ -12,7 +12,7 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  tesselations: 5,
+  tesselations: 8,
   'Load Scene': loadScene, // A function pointer, essentially
   palette: [242, 146, 146]
 };
@@ -46,8 +46,10 @@ function main() {
   gui.add(controls, 'tesselations', 0, 8).step(1);
   gui.add(controls, 'Load Scene');
   let colourController = gui.addColor(controls, 'palette')
-  
-
+  var mountains = {height : 1}
+  gui.add(mountains, 'height', 0, 5).name('Mountain Height');
+  var lightSpeed = {lightSpeed : 5}
+  gui.add(lightSpeed, 'lightSpeed', 0, 5).name('Light Speed')
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
   const gl = <WebGL2RenderingContext> canvas.getContext('webgl2');
@@ -142,7 +144,7 @@ function main() {
       icosphere,
       // square,
       // cube
-    ]);
+    ],lightSpeed.lightSpeed, mountains.height);
 
     stats.end();
 
