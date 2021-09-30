@@ -1,5 +1,53 @@
 # CIS 566 Project 1: Noisy Planets
 
+## Ruth Chung
+33615194
+helpful  resources:
+rachel's slides, shadertoy noise (links in shaders), glsl documentation
+
+(i promise i pushed before the deadline, it just took me a while to type up this readme ;-;)
+
+link to demo (apologies if it is on the wrong github link):
+[https://ruthchu.github.io/hw00-webgl-intro/]
+
+![](planet1.png)
+![](planet2.png)
+
+# Techniques used:
+TERRAIN
+- used simplex noise and fbm as well as a gain function to generate mountainous terrain
+- all outputs below a certain value were snapped to make a flat waterline
+- coastline is made by lerping height according to a easing function (not really sure if this worked but it flattened, and joins relatively smoothly)(coloring is not so great tho)
+- coloring between the coast and mountains is boundary based (did not have time to lerp nicely)
+
+WATER
+- used an interpolation based on a smoothstep between noise values to output the base color of the water
+- used noise to define boundaries of different wave caps (two different wavecap fuctions, one for the shore, one for deep water)
+- used warped simplex noise to make two different surface waves
+- shore waves are only generated when the noise falls within a certain boundary of the simplex noise
+- deep water wavecaps has a boundary to define when to make wavecaps that are stretched in the y direction (the larger lines) or very highly noisy wavecaps in "shallower" deep water (the twinkling areas above the lighter colored water)
+
+CLOUDS
+- second sphere with transparency values based on fbm noise
+- bounded the area the clouds would form in by the same simplex noise used on the the terrain
+- used a custom easing function to soften the edges of the clouds at the boundary
+
+LIGHTING
+- lambertian shading
+
+GUI FUNCTIONS
+terrainFreq:
+- changes the frequency at which the terrain is sampled
+- adjusts frequency for all of the water as well as the terrain
+cloudHeight:
+- changes the height at which the clouds form
+- clouds do not clip through terrain, boundaries at which clouds form changes accordingly with how high the clouds are (so you can make the height low and make it look like fog)
+- possible because the boundaries at which the clouds form uses the same noise function as the terrain
+color:
+- didn't have time to do something cooler with this
+- changes the color of the mountains
+
+
 ## Objective
 - Continue practicing WebGL and Typescript
 - Experiment with noise functions to procedurally generate the surface of a planet
