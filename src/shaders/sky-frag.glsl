@@ -109,11 +109,14 @@ vec4 fbm3(vec3 v, int octaves, float amp, float freq, float pers, float freq_pow
     return vec4(sum, dv);
 }
 
+float getBias(float time, float bias)
+{
+    return (time / ((((1.0/bias) - 2.0)*(1.0 - time))+1.0));
+}
+
 vec4 skyCol(vec2 uv)
 {
-    if(length(uv) < 0.2)
-        return vec4(1.0);
-    return mix(vec4(0.1,0.1,0.1,1.0), vec4(0.1,0.8,0.1,1.0), uv.y);
+    return mix(vec4(0.0,0.0,0.1,1.0), vec4(0.15,0.39,0.54,1.0), getBias(uv.y, 0.2));
 }
 
 void main()
@@ -130,7 +133,7 @@ void main()
     vec2 uv = sphereToUV(normalize(p.xyz));
     vec4 fbm = fbm3(uv.xyy, 5, 0.8f, 2.2f, 0.8f, 2.f);
 
-    out_Col = fbm.x * skyCol(uv);
+    out_Col = skyCol(uv);
     //out_Col.xy = u_Resolution.xy;
 
 }

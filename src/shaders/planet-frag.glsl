@@ -35,7 +35,7 @@ out vec4 out_Col; // This is the final output color that you will see on your
 // screen for the pixel that is currently being processed.
 
 vec3 hash3Vec3(vec3 v) {
-    return fract(sin(vec3(v.x * 10235.124, v.y * 38119.333333, v.z * 9199.2)));
+    return fract(sin(vec3(v.x * 105.1124, v.y * 119.34333, v.z * 99.332)) * 39185.3);
 
 }
 float hash3(vec3 v)
@@ -94,9 +94,9 @@ vec4 fbm3(vec3 v, int octaves, float amp, float freq, float pers, float freq_pow
     return vec4(sum, dv);
 }
 
-float getBias(float t, float bias)
+float getBias(float time, float bias)
 {
-    return t / ((((1.f / bias) - 2.f * (1.f - t)) + 1.f));
+    return (time / ((((1.0/bias) - 2.0)*(1.0 - time))+1.0));
 }
 
 float squareWave(float x, float freq, float amplitude, float modVal) {
@@ -117,15 +117,19 @@ vec3 randomColor(vec3 p, float freq)
     return hash3Vec3(floor(freq * p));
 }
 
+float quaImpulse( float k, float x )
+{
+    return 2.0*sqrt(k)*x/(1.0+k*x*x);
+}
+
+
 void main()
 {
     
     // Material base color (before shading)
-    vec4 diffuseColor = vec4(1.0,1.0,1.0,1.0);
+    vec4 diffuseColor = vec4(0.96,0.94,0.86,1.0);
     vec3 offset = vec3(20.f); //sin(u_Time * 0.002) * (1.f + 3.f * fs_Nor.xyz);
     vec4 fbm = fbm3(fs_Pos.xyz * 0.4, 4, 0.8f, 1.4f, 0.8f, 2.f);
-    vec4 fbm_color = fbm3(fs_Pos.xyz * 2.0, 4, 0.8f, 1.9f, 0.8f, 2.f);
-    fbm_color.x = clamp(0.5 * fbm_color.x + 0.5,0.0,1.0);
     vec4 norm = vec4(fs_TBN * fs_Nor.xyz, 0.0);
      norm = fs_Nor;
     float light_dist = 1.0 ;//distance(fs_LightPos, fs_WorldPos);
@@ -133,29 +137,29 @@ void main()
     float fbm_lerp = 0.04f;
     vec4 lightVec = normalize(fs_LightPos - fs_WorldPos);
     
-    
-//    diffuseColor.xyz = mix(u_SecondaryColor.xyz, u_Color.xyz, clamp((fbm_col.x + 1.0) * 0.5, 0.0, 1.f));
-
-    vec3 pole1 = vec3(0.0, 0.5, 0.0);
-    vec3 pole2 = vec3(0.0, -0.5, 0.0);
+    vec3 pole1 = vec3(0.0, 1.6, 0.0);
+    vec3 pole2 = vec3(0.0, -1.6, 0.0);
 
     float ks = 0.0;
     float kd = 1.0;
-
+    float isLight = 0.0;
     float cosPow = 0.f;
     float fbm_norm = (fbm.x + 1.0) * 0.5;
-    
+    fbm_norm = max (fbm_norm, 0.0);
+
+    vec4 fbm_color = fbm3(fs_Pos.xyz * 2.0, 4, 0.8f, 1.9f, 0.8f, 2.f);
+    fbm_color.x = clamp(0.5 * fbm_color.x + 0.5,0.0,1.0);
     vec3 mountainColor = mix(vec3(0.8f, 0.8f, 0.75f), vec3(0.4f, 0.4f, 0.5f), fbm_color.x);
     vec3 beachColor = vec3(0.4f, 0.6f, 0.f);
-    vec3 vegColor = vec3(0.73, 0.9f, 0.72f);
-    vec3 seaColor = vec3(0.4f, 0.79f, 0.9f);
+    vec3 vegColor = vec3(0.22, 0.38f, 0.11f);
+    vec3 seaColor = vec3(0.04f, 0.5f, 0.65f);
     vec3 snowColor = vec3(1.0f, 1.0f, 1.0f);
 
     // Colors of each biome.
-    float thresholds[5] = float[5](u_OceanThreshold - 0.8, u_OceanThreshold - 0.1, u_OceanThreshold, u_OceanThreshold + 1.0, u_OceanThreshold + 1.0);
+    float thresholds[4] = float[4](u_OceanThreshold - 0.8, u_OceanThreshold - 0.1, u_OceanThreshold, u_OceanThreshold + 1.0);
 
     float height = length(fs_WorldPos);
-    
+    //fbm_norm = 0.0;
 
     if(fbm_norm < thresholds[1]) {
         // land
@@ -165,14 +169,27 @@ void main()
         vec4 fbm_land_biomes = fbm3(fs_WorldPos.xyz * 0.3 + vec3(0.4, 0.1, -20.0), 3, 0.8f, 1.6f, 0.8f, 2.f);
         fbm_land_biomes.x = 0.5 + 0.5 * fbm_land_biomes.x;
         if(fbm_land_biomes.x < u_CityThreshold) {
-            float city_col = cubeWave(fs_WorldPos.xyz + sin(fs_WorldPos.xyz), 7.0, 0.9, 6.0, 0.0, 1.45);
-            float building_col = cubeWave(fs_WorldPos.xyz + sin(fs_WorldPos.xyz), 50.0, 5.0, 6.0, 1.0, 2.0);
+            float city_col = cubeWave(fs_WorldPos.xyz + sin(fs_WorldPos.xyz), 7.0, 0.9, 1.0, 0.0, 1.45);
+            float building_col = cubeWave(fs_WorldPos.xyz + sin(fs_WorldPos.xyz), 50.0, 1.0, 6.0, 1.0, 2.0);
+            
+            float blinkTime = mod(0.2 * u_Time + floor(fs_WorldPos.x * 100.0), 30.0);
+            blinkTime = quaImpulse(1.0, blinkTime);
+            vec3 windowColor = vec3(1.0,1.0,0.0);
+            
+            windowColor = randomColor(fs_WorldPos.xyz, 8.9);
+            windowColor = vec3(0.4);
+
+            vec3 windowColor2 = randomColor(fs_WorldPos.xyz + 2.0 , 5.0);
+            //windowColor2 = vec3(1.0);
+            windowColor = mix(windowColor, windowColor2, blinkTime);
             ks = 0.1;
-            float lit = city_col > 0.1 ? 1.0 : 0.0;
-            vec3 col = lit * building_col * city_col * randomColor(fs_WorldPos.xyz + sin(fs_WorldPos.xyz), 8.9) + vec3(0.2);
+            float lit = building_col > 0.1 ? 1.0 : 0.0;
+            isLight = lit;
+            vec3 col = 2.0 * lit * building_col * city_col * windowColor;
           //  vec3 randCol = city_col
             //city_col = city_col > 0.0 ? 1.0 : 0.0;
             diffuseColor.xyz = col;
+            ks = 0.9;
             cosPow = 120.f;
 
             //city
@@ -184,7 +201,9 @@ void main()
 
             if(height > 1.44)
             {
-                diffuseColor.xyz = mountainColor;
+                float vegMountainMix = clamp((height - 1.44) * 30.0, 0.0, 1.0);
+                vegMountainMix = getBias(vegMountainMix, 0.5);
+                diffuseColor.xyz = mix(vegColor, mountainColor,                 vegMountainMix);
             }
             
         }
@@ -192,8 +211,6 @@ void main()
         if(fbm_norm > thresholds[1] - 0.01){
             diffuseColor.xyz = vec3(1.0);
         }
-       // diffuseColor.xyz = mix(diffuseColor.xyz, beachColor.xyz, a);
-
 
     }
     
@@ -202,46 +219,43 @@ void main()
         // beaches
         float a = (fbm_norm - thresholds[1])
         / (thresholds[2] - thresholds[1]);
-        //a = getBias(a, 0.2);
+        a = getBias(a, 0.25);
         diffuseColor.xyz = mix(diffuseColor.xyz, beachColor, a + 0.4);
-        //ks = 0.1f;
+        ks = 0.1f;
         kd = 0.7;
         
-        // Snow
-        float poledist = 1.f - (min(distance(fs_Pos.xyz, pole1), distance(fs_Pos.xyz, pole2)))
-        + 0.05 * sin(fs_Pos.x) + 0.025 * sin(4.0 * fs_Pos.x);
-        float mixterm = clamp(poledist * 2.0, 0.f, 1.f);
-        diffuseColor.xyz = mix(diffuseColor.xyz, snowColor, mixterm);
-        ks = mix(0.2f, 0.5f,  mixterm);
-        kd = 0.6;
-        cosPow = mix(3.f, 129.f,  mixterm);
-
 
     }
+    
+    // Snow
+//    float poledist = 1.f - (min(distance(fs_Pos.xyz, pole1), distance(fs_Pos.xyz, pole2)))
+//    + 0.025 * sin(30.0 * fs_Pos.x) + 0.0125 * sin(60.0 * fs_Pos.x);
+//    float mixterm = clamp(poledist * 1.5, 0.f, 1.f);
+//    mixterm = getBias(mixterm, 0.86);
+//    diffuseColor.xyz = mix(diffuseColor.xyz, snowColor, mixterm);
+//    ks = mix(0.2f, 0.5f,  mixterm);
+//    kd = 0.6;
+//    cosPow = mix(3.f, 129.f,  mixterm);
+
     
     if (fbm_norm >= thresholds[2] && fbm_norm < thresholds[3]) {
         // water
         float a = (fbm_norm - thresholds[2])
         / (thresholds[3] - thresholds[2]);
         a = clamp(a * 2.0, 0.0, 1.0);
-        //a = clamp(a + 0.5, 0.0, 1.0);
         //a = getBias(a * 5.0, 0.99);
         diffuseColor.xyz = mix(diffuseColor.xyz, seaColor, a * 2.0);
         //diffuseColor.xyz = vec3(a);
         cosPow = 128.f;
         ks = 0.9f;
         //norm.xyz += 0.06 * sin(u_Time * 0.01) * norm.xyz;
-    } else if (fbm_norm >= thresholds[3] && fbm_norm < thresholds[4]) {
-        float a = (fbm_norm - thresholds[4])
-        / (thresholds[4] - thresholds[3]);
-        // polar
-        diffuseColor.xyz = vec3(0.9f, 0.9f, 0.9f);
     }
-
-    float diffuseTerm = pointlightIntensity * dot(normalize(norm), normalize(lightVec));
+    
+    float lambert = max(isLight, dot(normalize(norm), normalize(lightVec)));
+    float diffuseTerm = pointlightIntensity * lambert;
     // Avoid negative lighting values
     diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);
-    float ambientTerm = 0.3;
+    float ambientTerm = 0.2;
     vec4 viewVec = normalize(fs_WorldPos - u_CameraPos);
     vec4 h = normalize(lightVec - viewVec);
     

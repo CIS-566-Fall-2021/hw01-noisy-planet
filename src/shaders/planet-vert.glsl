@@ -125,11 +125,12 @@ float cubeWave(vec3 p, float freq, float amplitude, float freqJitter, float ampJ
 float getOffset(vec3 p)
 {
     vec4 fbm = fbm3(p * 0.4, 4, 0.8f, 1.4f, 0.8f, 2.f);
-
     float fbm_norm = (fbm.x + 1.0) * 0.5;
+    fbm_norm = max (fbm_norm, 0.0);
     float height = 0.f;
     float offset = 0.f;
-    float thresholds[5] = float[5](u_OceanThreshold - 0.6, u_OceanThreshold - 0.1, u_OceanThreshold, u_OceanThreshold + 1.0, u_OceanThreshold + 1.0);
+    float thresholds[4] = float[4](u_OceanThreshold - 0.8, u_OceanThreshold - 0.1, u_OceanThreshold, u_OceanThreshold + 1.0);
+    //fbm_norm = 0.0;
 
     if(fbm_norm < thresholds[1]) {
         //  land
@@ -145,7 +146,11 @@ float getOffset(vec3 p)
             vec4 fbm_hills = fbm3(p * 0.9 + 0.5, 3, 0.8f, 1.6f, 0.8f, 2.f);
             fbm_hills.x = 0.5 + 0.5 * fbm_hills.x;
             height = fbm_hills.x * 0.3;
-            
+            if (height < 0.1) {
+                vec4 fbm_trees = fbm3(p * 0.9 + 1.4, 4, 0.8f, 9.6f, 0.8f, 2.f);
+                height += fbm_trees.x * 0.04;
+
+            }
         }
         float pos = (fbm_norm - thresholds[0]) / (thresholds[2] - thresholds[0]);
         pos = clamp((pos - 0.5), 0.0, 1.0) / 0.5;
@@ -154,7 +159,10 @@ float getOffset(vec3 p)
     } else if (fbm_norm < thresholds[2]) {
         // beach
         float pos = (fbm_norm - thresholds[0]) / (thresholds[2] - thresholds[0]);
-        height = 0.0;
+        vec4 fbm_trees = fbm3(p * 0.9 + 1.4, 4, 0.8f, 4.6f, 0.8f, 2.f);
+        height += fbm_trees.x * 0.05;
+
+        //height = 0.0;
     } else if (fbm_norm < thresholds[3]) {
         //water
         float pos = (fbm_norm - thresholds[2]) / (thresholds[3] - thresholds[2]);
@@ -163,10 +171,6 @@ float getOffset(vec3 p)
         offset = 0.05 * fbm3(freq, 2, 0.8f, 1.6f, 0.3f, 2.f).x;
         freq = 3.0 * (p - vec3(abs(10.0 + cos(0.5 + u_Time * 0.0009))));
         offset += 0.05 * fbm3(freq, 2, 0.8f, 1.6f, 0.3f, 2.f).x;
-    } else {
-        // islands
-        float pos = (fbm_norm - thresholds[3]) / (thresholds[4] - thresholds[3]);
-        height = 0.01 * pos;
     }
     
     float polesize = 0.2;
@@ -211,9 +215,6 @@ void main()
     float height = getOffset(modelposition.xyz);
 
     float delta = 0.00001;
-//    vec4 norm = vec4(getOffset(modelposition.xyz + vec3(delta,0.0,0.0)) - getOffset(modelposition.xyz + vec3(-delta,0.0,0.0)),
-//    getOffset(modelposition.xyz + vec3(0.0,delta,0.0)) - getOffset(modelposition.xyz + vec3(0.0,-delta,0.0)), getOffset(modelposition.xyz + vec3(0.0,0.0,delta)) - getOffset(modelposition.xyz + vec3(0.0,0.0,-delta)), 0.0);
-    
     
     vec3 tangent = normalize(cross(vec3(0,1,0),fs_Nor.xyz));
     vec3 bitangent = normalize(cross(fs_Nor.xyz, tangent));
@@ -227,7 +228,6 @@ void main()
     vec3 v1 = getOffset(p1) * normalize(p1) + normalize(p1);
     vec3 v2 = getOffset(p2) * normalize(p2) + normalize(p2);
     
-    //fs_Nor = vec4(fs_TBN *  norm.xyz, 1.0);
     fs_LightPos = lightPos;
     modelposition.xyz += height * fs_Nor.xyz;
 
@@ -237,7 +237,6 @@ void main()
     fs_WorldPos = modelposition;
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
     
-    //norm = normalize(norm + vec4(0.0,0.0,0.0,0.0));
     fs_Nor = norm;
 
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is

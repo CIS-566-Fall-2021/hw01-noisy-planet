@@ -176,7 +176,7 @@ vec4 raycast(vec4 p, vec4 skyCol)
             // if density isn't accumulating properly, it's prob bc steps are too big
             float invDensity = (1.0 - density / densMax);
             //col += vec4(1.0,1.0,1.0, 0.3 * (1.0 - density * 1.f));
-            vec3 lerpCol = mix(vec3(0.7, 0.8, 1.0), vec3(0.9,0.9,1.0), max(invDensity, 0.0));
+            vec3 lerpCol = mix(u_Color.xyz, u_SecondaryColor.xyz, max(invDensity, 0.0));
             col += vec4(invDensity * lerpCol * (1.0 - col.a), invDensity);
             //}
         }
