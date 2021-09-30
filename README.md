@@ -13,8 +13,8 @@
       - 10 ~ 30: Earth
       - 30 ~ 50: Dessert
       - Above 50: Lava
-  - <img width="360" height="360" src="img/HW01-Earth.png">
-  - <img width="360" height="360" src="img/HW01-Lava Planet.png">
+  - <img height="360" src="img/HW01-Earth.png">
+  - <img height="360" src="img/HW01-Lava Planet.png">
 - Live Demo Link: 
 
 ## Objective
