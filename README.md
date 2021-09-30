@@ -21,6 +21,7 @@ TERRAIN
 - coloring between the coast and mountains is boundary based (did not have time to lerp nicely)
 
 WATER
+- waves move slowly over time
 - used an interpolation based on a smoothstep between noise values to output the base color of the water
 - used noise to define boundaries of different wave caps (two different wavecap fuctions, one for the shore, one for deep water)
 - used warped simplex noise to make two different surface waves
@@ -28,6 +29,7 @@ WATER
 - deep water wavecaps has a boundary to define when to make wavecaps that are stretched in the y direction (the larger lines) or very highly noisy wavecaps in "shallower" deep water (the twinkling areas above the lighter colored water)
 
 CLOUDS
+- move slowly over time within their boundary (didn't have time to noise the boundary)
 - second sphere with transparency values based on fbm noise
 - bounded the area the clouds would form in by the same simplex noise used on the the terrain
 - used a custom easing function to soften the edges of the clouds at the boundary
