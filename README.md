@@ -2,6 +2,9 @@
 Jake Lem
 Pennkey: jakelem
 
+Demo: https://jakelem.github.io/hw01-noisy-planet/
+
+
 Sources
 https://www.iquilezles.org/www/articles/functions/functions.htm
 https://www.iquilezles.org/www/articles/morenoise/morenoise.htm
