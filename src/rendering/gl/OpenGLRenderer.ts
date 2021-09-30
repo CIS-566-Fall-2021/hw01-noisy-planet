@@ -22,7 +22,9 @@ class OpenGLRenderer {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
 
-  render(camera: Camera, prog: ShaderProgram, col: number[], col2: number[], time: number, drawables: Array<Drawable>) {
+  render(camera: Camera, prog: ShaderProgram, col: number[], col2: number[], 
+         foam: number, arid: number, fauna: number, snow: number, 
+         time: number, drawables: Array<Drawable>) {
     let model = mat4.create();
     let viewProj = mat4.create();
     let color = vec4.fromValues(col[0]/255, col[1]/255, col[2]/255, col[3]);
@@ -35,6 +37,7 @@ class OpenGLRenderer {
     prog.setGeometryColor(color);
     prog.setGeometryColor2(color2);
     prog.setTime(time);
+    prog.setPlanetChar(foam, arid, fauna, snow);
 
     for (let drawable of drawables) {
       prog.draw(drawable);

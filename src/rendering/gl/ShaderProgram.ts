@@ -31,6 +31,10 @@ class ShaderProgram {
   unifColor: WebGLUniformLocation;
   unifColor2: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
+  unifFoam: WebGLUniformLocation;
+  unifArid: WebGLUniformLocation;
+  unifFauna: WebGLUniformLocation;
+  unifSnow: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -52,6 +56,10 @@ class ShaderProgram {
     this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
     this.unifColor2     = gl.getUniformLocation(this.prog, "u_Color2");
     this.unifTime       = gl.getUniformLocation(this.prog, "u_Time");
+    this.unifFoam       = gl.getUniformLocation(this.prog, "u_Foaminess");
+    this.unifArid       = gl.getUniformLocation(this.prog, "u_Aridity");
+    this.unifFauna      = gl.getUniformLocation(this.prog, "u_Fauna");
+    this.unifSnow       = gl.getUniformLocation(this.prog, "u_Snowiness");
   }
 
   use() {
@@ -100,6 +108,22 @@ class ShaderProgram {
     this.use();
     if (this.unifTime !== -1) {
       gl.uniform1f(this.unifTime, time);
+    }
+  }
+
+  setPlanetChar(foam: number, arid: number, fauna: number, snow: number) {
+    this.use();
+    if (this.unifFoam !== -1) {
+      gl.uniform1f(this.unifFoam, foam);
+    }
+    if (this.unifArid !== -1) {
+      gl.uniform1f(this.unifArid, arid);
+    }
+    if (this.unifFauna !== -1) {
+      gl.uniform1f(this.unifFauna, fauna);
+    }
+    if (this.unifSnow !== -1) {
+      gl.uniform1f(this.unifSnow, snow);
     }
   }
 

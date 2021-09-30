@@ -12,16 +12,20 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  tesselations: 5,
+  tesselations: 6,
   color: [15, 113, 168, 1],
   color2: [200, 200, 200, 1],
+  foaminess: 0.4,
+  aridity: 1.0,
+  fauna: 0.25,
+  snowiness: 0.4,
   'Load Scene': loadScene, // A function pointer, essentially
 };
 
 let icosphere: Icosphere;
 let square: Square;
 let cube: Cube;
-let prevTesselations: number = 5;
+let prevTesselations: number = 6;
 let time: number = 0;
 
 function loadScene() {
@@ -54,8 +58,12 @@ function main() {
   const gui = new DAT.GUI();
   gui.add(controls, 'tesselations', 0, 8).step(1);
   gui.add(controls, 'Load Scene');
-  gui.addColor(controls, 'color');
-  gui.addColor(controls, "color2");
+  // gui.addColor(controls, 'color');
+  // gui.addColor(controls, "color2");
+  gui.add(controls, 'foaminess', 0.0, 1.0).step(0.01);
+  gui.add(controls, 'aridity', 0.0, 1.0).step(0.01);
+  gui.add(controls, 'fauna', 0.0, 1.0).step(0.01);
+  gui.add(controls, 'snowiness', 0.0, 1.0).step(0.01);
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -73,7 +81,7 @@ function main() {
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
-  renderer.setClearColor(0.2, 0.2, 0.2, 1);
+  renderer.setClearColor(7 / 255.0, 10 / 255.0, 30 / 255.0, 1);
   gl.enable(gl.DEPTH_TEST);
 
   //const lambert = new ShaderProgram([
@@ -99,9 +107,10 @@ function main() {
       icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, prevTesselations);
       icosphere.create();
     }
-    renderer.render(camera, customShader, controls.color, controls.color2, time, [
-      //icosphere,
-      cube,
+    renderer.render(camera, customShader, controls.color, controls.color2,
+                    controls.foaminess, controls.aridity, controls.fauna, controls.snowiness, time, [
+      icosphere,
+      //cube,
       // square,
     ]);
     stats.end();

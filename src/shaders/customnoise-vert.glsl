@@ -26,6 +26,7 @@ out vec4 fs_Nor;            // The array of normals that has been transformed by
 out vec4 fs_LightVec;       // The direction in which our virtual light lies, relative to each vertex. This is implicitly passed to the fragment shader.
 out vec4 fs_Col;            // The color of each vertex. This is implicitly passed to the fragment shader.
 out vec4 fs_Pos;            // Position of each vertex
+out vec4 fs_CameraPos;
 
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
@@ -35,15 +36,15 @@ float cubicEase(float x)
     return x * x * (3.0 - 2.0 * x);
 }
 
-float noise3d(vec3 p)
+vec3 noise3d(vec3 p)
 {
-    return fract(sin((dot(p, vec3(127.1,
-                                  311.7,
-                                  191.999)))) *         
-                 43758.5453);
+    return fract(sin(vec3(dot(p, vec3(127.1, 311.7, 191.999)),
+                          dot(p, vec3(127.1, 311.7, 191.999)),
+                          dot(p, vec3(127.1, 311.7, 191.999)))
+                    ) * 43758.5453);
 }
 
-float interpNoise3D(vec3 p) {
+vec3 interpNoise3D(vec3 p) {
     int intX = int(floor(p.x));
     float fractX = cubicEase(fract(p.x));
     int intY = int(floor(p.y));
@@ -51,35 +52,34 @@ float interpNoise3D(vec3 p) {
     int intZ = int(floor(p.z));
     float fractZ = cubicEase(fract(p.z));
 
-    float v1 = noise3d(vec3(intX, intY, intZ));
-    float v2 = noise3d(vec3(intX + 1, intY, intZ));
-    float v3 = noise3d(vec3(intX, intY + 1, intZ));
-    float v4 = noise3d(vec3(intX + 1, intY + 1, intZ));
+    vec3 v1 = noise3d(vec3(intX, intY, intZ));
+    vec3 v2 = noise3d(vec3(intX + 1, intY, intZ));
+    vec3 v3 = noise3d(vec3(intX, intY + 1, intZ));
+    vec3 v4 = noise3d(vec3(intX + 1, intY + 1, intZ));
 
-    float v5 = noise3d(vec3(intX, intY, intZ + 1));
-    float v6 = noise3d(vec3(intX + 1, intY, intZ + 1));
-    float v7 = noise3d(vec3(intX, intY + 1, intZ + 1));
-    float v8 = noise3d(vec3(intX + 1, intY + 1, intZ + 1));
+    vec3 v5 = noise3d(vec3(intX, intY, intZ + 1));
+    vec3 v6 = noise3d(vec3(intX + 1, intY, intZ + 1));
+    vec3 v7 = noise3d(vec3(intX, intY + 1, intZ + 1));
+    vec3 v8 = noise3d(vec3(intX + 1, intY + 1, intZ + 1));
 
-    float i1 = mix(v1, v2, fractX);
-    float i2 = mix(v3, v4, fractX);
-    float iC1 = mix(i1, i2, fractY);
-    float i3 = mix(v5, v6, fractX);
-    float i4 = mix(v7, v8, fractX);
-    float iC2 = mix(i3, i4, fractY);
+    vec3 i1 = mix(v1, v2, fractX);
+    vec3 i2 = mix(v3, v4, fractX);
+    vec3 iC1 = mix(i1, i2, fractY);
+    vec3 i3 = mix(v5, v6, fractX);
+    vec3 i4 = mix(v7, v8, fractX);
+    vec3 iC2 = mix(i3, i4, fractY);
     return mix(iC1, iC2, fractZ);
-    return 1.0;
 }
 
-float sampleNoise(vec3 p)
+vec3 sampleNoise(vec3 p)
 {
     // can be expanded
     return interpNoise3D(p);
 }
 
-float fbm(vec3 p)
+vec3 fbm(vec3 p)
 {
-    float total = 0.0;
+    vec3 total = vec3(0.0);
     float persistence = 1.0 / 2.0;
 
     // loop over number of octaves
@@ -93,6 +93,35 @@ float fbm(vec3 p)
     return total;
 }
 
+float getBias(float time, float bias)
+{
+  return (time / ((((1.0/bias) - 2.0)*(1.0 - time))+1.0));
+}
+
+float getGain(float time, float gain)
+{
+  if(time < 0.5)
+    return getBias(time * 2.0,gain)/2.0;
+  else
+    return getBias(time * 2.0 - 1.0,1.0 - gain)/2.0 + 0.5;
+}
+
+float sawtoothWave(float x, float freq, float amplitude)
+{
+    return (x * freq - floor(x * freq)) * amplitude;
+}
+
+vec4 calculateDeform(vec4 pos)
+{
+    vec3 noiseInput = 2.0 * pos.xyz;
+    vec3 noise = clamp(fbm(noiseInput) / 2.0, 0.0, 1.0);
+    if (noise.x < 0.5)
+    {
+        noise.x = 0.4 + 0.1 * clamp(fbm(pos.xyz + sin(u_Time)).x, 0.0, 1.0);
+    }
+    return pos + noise.x * vs_Nor;
+}
+
 void main()
 {
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
@@ -104,14 +133,19 @@ void main()
                                                             // perpendicular to the surface after the surface is transformed by
                                                             // the model matrix.
 
-    vec4 newPos = vs_Pos + 0.1 * sin(u_Time) * vec4(fbm(vs_Pos.xyz), fbm(vs_Pos.yzx), fbm(vs_Pos.zxy), 1.0);
+    vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
 
-    fs_Pos = vs_Pos;                        // Pass vertex positions to drive fragment shader noise
-
-    vec4 modelposition = u_Model * newPos;   // Temporarily store the transformed vertex positions for use below
+    fs_Pos = vs_Pos;
 
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
 
-    gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is
-                                             // used to render the final positions of the geometry's vertices
+    fs_CameraPos = inverse(u_ViewProj) * vec4(0.0,0.0,1.0,1.0);
+
+    // custom code
+    vec4 newModelPosition = calculateDeform(modelposition);
+
+    fs_Pos = vs_Pos;
+
+    gl_Position = u_ViewProj * newModelPosition;
+    // custom code
 }
