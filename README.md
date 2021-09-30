@@ -33,19 +33,19 @@ https://www.shadertoy.com/view/4ldGRf
 - __Biomes and Noise:__ My planet has Ocean, Mountain, Vegetation, Beach, and City Biomes. These were separated using a 3D FBM function as a mask. The ocean biome was created by overlapping several FBM functions that translate over time. The Mountain and Vegetation also used FBM of varying frequencies to simulate low frequency hills and high frequency vegetation spikes. 
 
 
--__Clouds:__ I created clouds surrounding my planet using a separate raymarching shader. I accumulate cloud density by sampling a 3D FBM function. I occlude the cloud color around the planet by using CSG difference with a sphere.
+- __Clouds:__ I created clouds surrounding my planet using a separate raymarching shader. I accumulate cloud density by sampling a 3D FBM function. I occlude the cloud color around the planet by using CSG difference with a sphere.
 
 
 - __Toolbox Functions:__ I used bias and linear interpolation to blend biome colors at their edges. I  used overlapping square waves in the X, Y, and Z directions to generate the city biomes. I used impulse to animate the city lights. Finally, I used sine curves on time to animate the ocean waves and clouds.
 
 
--__Surface reflection models:__ I implemented lambert, blinn phong, and simple flat shading for various sections of my biomes. Each biome has separate specular and diffuse coefficients to determine the contribution of each reflection model. The city biome uses flat shading for its lights.
+- __Surface reflection models:__ I implemented lambert, blinn phong, and simple flat shading for various sections of my biomes. Each biome has separate specular and diffuse coefficients to determine the contribution of each reflection model. The city biome uses flat shading for its lights.
 
 
--__Additional Features__: The shader also has a very simple skybox that interpolates between two colors.
+- __Additional Features__: The shader also has a very simple skybox that interpolates between two colors.
 
 
--__Modifiable Attributes__: The user can change the colors of the clouds and the amount of clouds on the planet. The user can also change the size of the city and landmass on the planet.
+- __Modifiable Attributes__: The user can change the colors of the clouds and the amount of clouds on the planet. The user can also change the size of the city and landmass on the planet.
 
 ## Objective
 - Continue practicing WebGL and Typescript
