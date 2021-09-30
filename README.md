@@ -3,6 +3,9 @@
 ## Submission
 - https://feliyick.github.io/hw01-noisy-planet/
 
+![image](https://user-images.githubusercontent.com/59979404/135375865-831f1320-c439-4fb8-ac2a-02846df745e1.png)
+
+
 ![image](https://user-images.githubusercontent.com/59979404/135326821-759f23ad-2b8d-4c34-a3c7-6730bb84c8fd.png)
 
 
@@ -11,8 +14,8 @@
 - Different levels of summed perlin are used for biome heights, and various noise functions and cosine colour palettes in combination with bias and gain are used to colour the terrain.
 - There are four four different biomes: slime ocean, ice mountains, pink desert, and purple grasslands. 
 - Slime ocean is animated/displaced in x and y directions using sin and easeInOutQuadratic functions
-- There are GUI controls for land distribution, light source speed, and flower distribution.
-- The flowers are created using a pow(fbm) for texturing and placement. 
+- There are GUI controls for land distribution, light source speed, and tree distribution.
+- The trees are created using a pow(fbm) for texturing and placement. The splattered effect is done by thresholding.
 - Blinn phong shading on mountains, ice caps, and ocean. Lambert shading on the grass and desert.
 - Noise functions used are all 3D
 
