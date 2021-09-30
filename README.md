@@ -1,5 +1,27 @@
 # CIS 566 Project 1: Noisy Planets
 
+## Submission
+- Name: Felicity Yick
+- Pennkey: feliyick
+- https://feliyick.github.io/hw01-noisy-planet/
+
+![image](https://user-images.githubusercontent.com/59979404/135376013-98f8da61-a79a-45b3-8a16-1aca179235a4.png)
+
+**Inspiration**
+- The planet is inspired from my alien mini minecraft from Spring 2020 (https://vimeo.com/user68496369) :) I wanted to replicate the different types of biomes I implemented for that project.
+
+**Terrain / Biomes**
+- There are four different biomes: slime lake, ice mountains, distant desert, and poisonous grasslands. There are blue tree scattered across the grasslands.
+- Biome types are enumerated and are determined by using a worley(fbm) noise function. Using the float value generated from this biome map, I used different levels of summed perlin are used for biome heights.
+- Various noise functions and cosine colour palettes in combination with bias and gain are used to colour the terrain. I used this website religiously for the colour palettes http://dev.thi.ng/gradients/
+- The slime lake biome is animated/displaced in x and y directions using sin and easeInOutQuadratic functions to give it a marbley, wavey effect.
+- The trees are created using a pow(fbm) for texturing and placement. The splattered effect is done by thresholding.
+- Blinn phong shading is used on mountains, ice caps, and lake, while lambert shading is used on the grass and desert.
+
+**GUI**
+- There are GUI controls for land distribution, light source speed, and tree distribution. The land distribution function controls the sampling frequency of the biome map/noise function. The light source in the scene rotates and the user can control how fast or slow it moves. Similar to land distribution, tree distribution controls how many trees populate the grasslands.
+- Noise functions used are all 3D
+
 ## Objective
 - Continue practicing WebGL and Typescript
 - Experiment with noise functions to procedurally generate the surface of a planet
