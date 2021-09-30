@@ -3,6 +3,16 @@
 ## Submission Details
 Name: Nathaniel Korzekwa
 PennKey: korzekwa
+Live Demo Link: 
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/6472567/135378051-2bb5ccea-48e9-4302-b683-3ae11593640c.png">
+</p>
+<p align="center">Planet Angle 1</p>
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/6472567/135378046-0cac887b-1d09-4106-badd-86cccf5c6aed.png">
+</p>
+<p align="center">Planet Angle 2</p>
 
 ## Objective
 - Continue practicing WebGL and Typescript
