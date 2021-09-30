@@ -4,7 +4,6 @@
 Name: Nathaniel Korzekwa
 PennKey: korzekwa
 
-
 ## Objective
 - Continue practicing WebGL and Typescript
 - Experiment with noise functions to procedurally generate the surface of a planet
