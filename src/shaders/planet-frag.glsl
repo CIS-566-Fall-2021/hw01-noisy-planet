@@ -238,7 +238,7 @@ vec3 vertexHeightNoise(vec3 position) {
     vec4 modelposition = u_Model * vec4(position, 1.0);   // Temporarily store the transformed vertex positions for use below
 
     vec3 noiseInput = modelposition.xyz;
-    //noiseInput += getAnimation();
+    noiseInput += getAnimation();
 
     vec3 noise = fbmNoise(noiseInput) * noiseInput;
     
@@ -255,7 +255,7 @@ vec3 vertexHeightNoise(vec3 position) {
 }
 
 vec4 getNewNormal(vec4 norm) {
-    float epsilon = 0.001;
+    float epsilon = 0.01;
     
     // vec3 tangent = normalize(cross(vec3(0.0, 1.0, 0.0), vec3(vs_Nor)));
 
@@ -288,13 +288,13 @@ vec4 getNewNormal(vec4 norm) {
     // vec3 point3 = fs_Pos.xyz - epsilon * tangent + negX * norm.xyz;
     // vec3 point4 = fs_Pos.xyz - epsilon * bitangent + negY * norm.xyz;
     //return vec4(point1, 1.0);
-    return vec4(normalize(cross(normalize(point1 - point3), normalize(point2 - point4))), 1.0);
+    return vec4(normalize(cross(normalize(point1 - point3), normalize(point2 - point4))), 0.0);
     //return vec4(normalize(cross(normalize(pos))))
 } 
 
 vec4 getFinalColor(vec3 noiseInput, vec4 diffuseColor, float diffuseTerm, float lightIntensity) {
 
-    //noiseInput += getAnimation();
+    noiseInput += getAnimation();
     vec3 noise = fbmNoise(noiseInput) * noiseInput;
 
     bool isBlinn = false;
@@ -348,7 +348,7 @@ vec4 getFinalColor(vec3 noiseInput, vec4 diffuseColor, float diffuseTerm, float 
         surfaceColor = mix(landColor, surfaceColor, 0.5);
 
         vec3 noiseInput2 = fs_Pos.xyz;
-        //noiseInput2 += getAnimation();
+        noiseInput2 += getAnimation();
         float noiseScale2 =  fbmNoise2(noiseInput2);
         if (noiseScale2 > 0.6) {
             surfaceColor += vec3(0.5,0.0,0.4);
@@ -357,7 +357,7 @@ vec4 getFinalColor(vec3 noiseInput, vec4 diffuseColor, float diffuseTerm, float 
         vec3 deepSeaColor = convertRGB(0.0, 18.0, 14.0);
 
         vec3 noiseInput2 = fs_Pos.xyz;
-        //noiseInput2 += getAnimation();
+        noiseInput2 += getAnimation();
         float noiseScale2 = fbmNoise3(noiseInput2);
         if (noiseScale2 > 0.4) {
             surfaceColor = mix(deepSeaColor, surfaceColor, 0.9);
@@ -368,19 +368,20 @@ vec4 getFinalColor(vec3 noiseInput, vec4 diffuseColor, float diffuseTerm, float 
     // out_Col = newNorm;
     // return newNorm;
 
-    diffuseColor = vec4(surfaceColor, 1.0);
+    diffuseColor = clamp(vec4(surfaceColor, 1.0), 0.0, 1.0);
 
     if (!isBlinn) {
-        return vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
+        return vec4(diffuseColor.rgb * lightIntensity, 1.0);
     } else {
         //BLINN PHONG SHADING
-        vec4 camVec = normalize(vec4(vec3(u_Camera) - vec3(fs_Pos), 0.0));
-        vec4 lightVec = normalize(vec4(vec3(u_Camera) - vec3(fs_LightVec), 0.0));
-        vec4 avg_h = vec4((camVec + lightVec) / 2.0);
-        float specIntensity = (pow(max(dot(normalize(avg_h), normalize(fs_Nor)), 0.0), 20.0));
+        vec3 V = normalize(vec3(u_Camera) - vec3(fs_Pos));
+        vec3 L = normalize(vec3(fs_LightVec) - vec3(fs_Pos));
+        vec4 avg_h = vec4((V + L) / 2.0, 0.0);
+        float specIntensity = max(pow(dot(avg_h, newNorm), 30.0), 0.0);
         
         // Compute final shaded colo2
-        return vec4(diffuseColor.rgb * (lightIntensity + specIntensity), diffuseColor.a);
+        //return diffuseColor;
+        return vec4(diffuseColor.rgb * (lightIntensity + specIntensity), 1.0);
     } 
 
 }
@@ -399,7 +400,7 @@ void main()
     // Avoid negative lighting values
     diffuseTerm = clamp(diffuseTerm, 0.0, 1.0);
 
-    float ambientTerm = 0.2;
+    float ambientTerm = 0.001;
 
     float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier
                                                         //to simulate ambient lighting. This ensures that faces that are not

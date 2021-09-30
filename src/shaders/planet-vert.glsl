@@ -264,19 +264,32 @@ void main()
     //begin tinkering
 
     vec3 noiseInput = modelposition.xyz;
-    //noiseInput += getAnimation();
+    noiseInput += getAnimation();
 
     vec3 noise = fbmNoise(noiseInput) * noiseInput;
     
     float noiseScale = noise.r;
 
+    bool isLand = false;
     if (noise.r < 0.5) {
         noiseScale = 0.5;
+    } else {
+        isLand = true;
     }
 
 
     vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
-    vec3 noisyModelPosition = modelposition.xyz + 0.075 * offsetAmount;
+    vec3 noisyModelPosition = modelposition.xyz + 0.1 * offsetAmount;
+
+    if (isLand) {
+        vec3 noiseInput2 = fs_Pos.xyz;
+        noiseInput2 += getAnimation();
+        float noiseScale2 =  fbmNoise2(noiseInput2);
+        offsetAmount = vec3(vs_Nor) * noiseScale2;
+        // if (noiseScale2 > 0.6) {
+        //     noisyModelPosition += 0.075 * offsetAmount;
+        // } 
+    }
 
     //CALCULATE NEW NORMAL
     // float epsilon = 0.0001;

@@ -74,6 +74,10 @@ function main() {
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(255.0 / 255.0, 217.0 / 255.0, 241.0 / 255.0, 1.0);
   gl.enable(gl.DEPTH_TEST);
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  gl.enable(gl.CULL_FACE);
+  gl.frontFace(gl.CW);
 
   const lambert = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
