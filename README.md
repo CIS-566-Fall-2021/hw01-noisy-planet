@@ -1,5 +1,24 @@
 # CIS 566 Project 1: Noisy Planets
 
+Name: Eddie Huang
+PennKey: huanged
+
+Earth:
+![](Earth.png)
+
+Molten:
+![](Molten.png)
+
+Ice:
+![](Ice.png)
+
+Startburst:
+![](Starburst.png)
+
+Project Description:
+
+
+
 ## Objective
 - Continue practicing WebGL and Typescript
 - Experiment with noise functions to procedurally generate the surface of a planet
