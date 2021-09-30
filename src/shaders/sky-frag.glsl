@@ -38,6 +38,9 @@ out vec4 out_Col; // This is the final output color that you will see on your
 const float PI = 3.14159265359;
 const float TWO_PI = 6.28318530718;
 
+vec2 random2( vec2 p ) {
+    return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
+}
 
 float hash3(vec3 v)
 {
@@ -116,7 +119,9 @@ float getBias(float time, float bias)
 
 vec4 skyCol(vec2 uv)
 {
-    return mix(vec4(0.0,0.0,0.1,1.0), vec4(0.15,0.39,0.54,1.0), getBias(uv.y, 0.2));
+    vec4 res = mix(vec4(0.0,0.0,0.1,1.0), vec4(0.2,0.45,0.66,1.0), getBias(uv.y, 0.2));
+
+    return res;
 }
 
 void main()

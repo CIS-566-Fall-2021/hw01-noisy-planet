@@ -152,7 +152,7 @@ void main()
     vec3 mountainColor = mix(vec3(0.8f, 0.8f, 0.75f), vec3(0.4f, 0.4f, 0.5f), fbm_color.x);
     vec3 beachColor = vec3(0.4f, 0.6f, 0.f);
     vec3 vegColor = vec3(0.22, 0.38f, 0.11f);
-    vec3 seaColor = vec3(0.04f, 0.5f, 0.65f);
+    vec3 seaColor = vec3(0.14f, 0.7f, 0.85f);
     vec3 snowColor = vec3(1.0f, 1.0f, 1.0f);
 
     // Colors of each biome.
@@ -243,7 +243,7 @@ void main()
         float a = (fbm_norm - thresholds[2])
         / (thresholds[3] - thresholds[2]);
         a = clamp(a * 2.0, 0.0, 1.0);
-        //a = getBias(a * 5.0, 0.99);
+        a = getBias(a, 0.6);
         diffuseColor.xyz = mix(diffuseColor.xyz, seaColor, a * 2.0);
         //diffuseColor.xyz = vec3(a);
         cosPow = 128.f;
