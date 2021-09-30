@@ -7,7 +7,7 @@
   - Used FBM noise functions and toolbox functions, such as gain and smoothstep to generate multiple biomes
   - Sliders:
     - Moon Speed slider can modify the speed of moon's rotation around the planet
-    - Continent Number slider can modify the amount of continents
+    - Continent Number slider can modify the amount of continents of the planet
     - Temparature slider changes the planet's biome based on the value
       - Below 10: Arctic
       - 10 ~ 30: Earth
