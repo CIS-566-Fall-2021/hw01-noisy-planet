@@ -1,5 +1,10 @@
 # CIS 566 Project 1: Noisy Planets
 
+## Submission Details
+Name: Nathaniel Korzekwa
+PennKey: korzekwa
+
+
 ## Objective
 - Continue practicing WebGL and Typescript
 - Experiment with noise functions to procedurally generate the surface of a planet
@@ -50,8 +55,7 @@ Commit and push to Github, then __make a pull request on the original Github rep
 For this assignment, and for all future assignments, modify this README file
 so that it contains the following information:
 - Your name and PennKey
-- Citation of any external resources you found helpful when implementing this
-assignment.
+- Citation of any external resources you found helpful when implementing this assignment.
 - A link to your live github.io demo
 - At least one screenshot of your planet
 - An explanation of the techniques you used to generate your planet features.
