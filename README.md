@@ -3,10 +3,14 @@
 ## Submission
 - https://feliyick.github.io/hw01-noisy-planet/
 
-![image](https://user-images.githubusercontent.com/59979404/135375865-831f1320-c439-4fb8-ac2a-02846df745e1.png)
+![image](https://user-images.githubusercontent.com/59979404/135376013-98f8da61-a79a-45b3-8a16-1aca179235a4.png)
 
+![image](https://user-images.githubusercontent.com/59979404/135376097-408bb59f-1a64-431e-92d4-69de36252651.png)
 
-![image](https://user-images.githubusercontent.com/59979404/135326821-759f23ad-2b8d-4c34-a3c7-6730bb84c8fd.png)
+![image](https://user-images.githubusercontent.com/59979404/135376134-f6f7771a-00ce-4309-bdc6-0d73a159e53b.png)
+
+![image](https://user-images.githubusercontent.com/59979404/135376163-48ff044a-0f33-4065-a9d9-97a971b0680f.png)
+
 
 
 - Planet inspired from my alien mini minecraft from Spring 2020 :)
