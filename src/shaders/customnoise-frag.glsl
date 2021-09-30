@@ -161,7 +161,7 @@ void main()
 
     vec3 finalColor = vec3(0.0);
         
-    float foaminess = 1.0 - u_Foaminess;
+    float foaminess = 1.001 - u_Foaminess;
     float aridity = u_Aridity;
     float fauna = u_Fauna;
     float snowiness = u_Snowiness / 4.0;
@@ -207,7 +207,7 @@ void main()
     newNormal = normalize(newNormal);
 
     // calculate lighting
-    vec4 lightVec = fs_LightVec;
+    vec4 lightVec = vec4(fs_LightVec.x * cos(u_Time), fs_LightVec.y, fs_LightVec.z * sin(u_Time), fs_LightVec.w);
 
     float diffuseTerm = clamp(dot(vec4(newNormal, 0.0), normalize(lightVec)), 0.0, 1.0);
 

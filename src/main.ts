@@ -60,10 +60,10 @@ function main() {
   gui.add(controls, 'Load Scene');
   // gui.addColor(controls, 'color');
   // gui.addColor(controls, "color2");
-  gui.add(controls, 'foaminess', 0.0, 1.0).step(0.01);
-  gui.add(controls, 'aridity', 0.0, 1.0).step(0.01);
-  gui.add(controls, 'fauna', 0.0, 1.0).step(0.01);
-  gui.add(controls, 'snowiness', 0.0, 1.0).step(0.01);
+  gui.add(controls, 'foaminess', 0.01, 1.0).step(0.01);
+  gui.add(controls, 'aridity', 0.01, 1.0).step(0.01);
+  gui.add(controls, 'fauna', 0.01, 1.0).step(0.01);
+  gui.add(controls, 'snowiness', 0.01, 1.0).step(0.01);
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
