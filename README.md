@@ -11,8 +11,11 @@ https://jakelem.github.io/hw01-noisy-planet/
 Sources
 
 https://www.iquilezles.org/www/articles/functions/functions.htm
+
 https://www.iquilezles.org/www/articles/morenoise/morenoise.htm
+
 https://www.shadertoy.com/view/XslGRr
+
 https://www.shadertoy.com/view/4ldGRf
 
 <p align="center">
