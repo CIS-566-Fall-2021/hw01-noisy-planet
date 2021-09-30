@@ -27,6 +27,7 @@ in vec4 fs_Pos;
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
 
+// NOISE FUNCTIONS //
 vec3 noise3D(vec3 p) {
     float val1 = fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 43758.5453);
 
@@ -122,7 +123,9 @@ float perlinNoise3D(vec3 p) {
 	}
 	return surfletSum;
 }
+// NOISE FUNCTIONS END //
 
+// TOOLBOX FUNCTIONS //
 float bias(float time, float bias) {
     return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
 }
@@ -134,7 +137,9 @@ float gain(float time, float gain) {
         return bias(time * 2.0 - 1.0, 1.0 - gain) / 2.0 + 0.5;
     }
 }
+// TOOLBOX FUNCTIONS END //
 
+// COLOR FUNCTIONS //
 vec3 rgb(float r, float g, float b) {
     return vec3(r / 255.f, g / 255.f, b / 255.f);
 }
@@ -148,30 +153,7 @@ const vec3 d = vec3(0.0, 0.3333, 0.6666);
 vec3 cosinePalette(float t) {
     return a + b * cos(6.2831 * (c * t + d));
 }
-
-vec4 when_eq(vec4 x, vec4 y) {
-  return 1.0 - abs(sign(x - y));
-}
-
-vec4 when_neq(vec4 x, vec4 y) {
-  return abs(sign(x - y));
-}
-
-vec4 when_gt(vec4 x, vec4 y) {
-  return max(sign(x - y), 0.0);
-}
-
-vec4 when_lt(vec4 x, vec4 y) {
-  return max(sign(y - x), 0.0);
-}
-
-vec4 when_ge(vec4 x, vec4 y) {
-  return 1.0 - when_lt(x, y);
-}
-
-vec4 when_le(vec4 x, vec4 y) {
-  return 1.0 - when_gt(x, y);
-}
+// COLOR FUNCTIONS END //
 
 void main()
 {
@@ -189,8 +171,7 @@ void main()
                                                             //to simulate ambient lighting. This ensures that faces that are not
                                                             //lit by our point light are not completely black.
 
-        // BEGIN TINKERING
-
+        // Match noise functions with vertex shader
         vec3 noiseInput = fs_Pos.xyz;
         // Adjust this to change continent size
         noiseInput *= 2.f * u_NoiseInput;
@@ -201,7 +182,6 @@ void main()
         vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 
         float t = noise.r;
-
         t = gain(t, 0.02f);
 
         vec3 noiseColor = cosinePalette(t);

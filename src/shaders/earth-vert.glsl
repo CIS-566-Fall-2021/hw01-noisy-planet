@@ -40,6 +40,7 @@ out vec4 fs_Pos;
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
 
+// NOISE FUNCTIONS //
 vec3 noise3D(vec3 p) {
     float val1 = fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 43758.5453);
 
@@ -193,6 +194,7 @@ float worley(vec3 pos, vec3 scale, vec3 offset){
 }
 // NOISE FUNCITONS END //
 
+// ROTATION FUNCTIONS //
 float degreesToRadians(float deg) {
     return deg * 3.14159265359f / 180.f;
 }
@@ -217,7 +219,9 @@ mat4 rotateZ(float angle) {
 				0, 0, 1, 0,
 				0, 0, 0, 1);
 }
+// ROTATION FUNCTIONS END //
 
+// TOOLBOX FUNCTIONS //
 float bias(float time, float bias) {
     return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
 }
@@ -234,71 +238,32 @@ float impulse(float k, float x) {
     float h = k * x;
     return h * exp(1.f - h);
 }
+// TOOLBOX FUNCTIONS END //
 
-// Cosine palette variables
-const vec3 a = vec3(0.5, 0.5, 0.5);
-const vec3 b = vec3(0.5, 0.5, 0.5);
-const vec3 c = vec3(1.0, 1.0, 1.0);
-const vec3 d = vec3(0.0, 0.1, 0.2);
-
-vec3 cosinePalette(float t) {
-    return a + b * cos(6.2831 * (c * t + d));
-}
-
-vec4 when_eq(vec4 x, vec4 y) {
-  return 1.0 - abs(sign(x - y));
-}
-
-vec4 when_neq(vec4 x, vec4 y) {
-  return abs(sign(x - y));
-}
-
-vec4 when_gt(vec4 x, vec4 y) {
-  return max(sign(x - y), 0.0);
-}
-
-vec4 when_lt(vec4 x, vec4 y) {
-  return max(sign(y - x), 0.0);
-}
-
+// CONDITIONAL FUNCTIONS //
 float when_lt(float x, float y) {
   return max(sign(y - x), 0.0);
-}
-
-vec4 when_ge(vec4 x, vec4 y) {
-  return 1.0 - when_lt(x, y);
 }
 
 float when_ge(float x, float y) {
   return 1.0 - when_lt(x, y);
 }
+// CONDITIONAL FNCTIONS END //
 
-vec4 when_le(vec4 x, vec4 y) {
-  return 1.0 - when_gt(x, y);
-}
-
+// Takes a point and transforms its position using noise functions
 vec3 noisePosition(vec3 p) {
+  // User modifies noise input
   vec3 noiseInput = p.xyz;
   noiseInput *= 1.0f * u_NoiseInput;
 
   // Animation!
   noiseInput += float(u_Time) * 0.0005 * u_AnimationSpeed;
 
+  // Noise values
   vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
   float perlinNoise = 0.5f * abs(perlin(noiseInput * vec3(10.f)));
   float worleyNoise = 0.1f * worley(noiseInput, vec3(4.f), vec3(0.f));
 
-  //float timeScale = impulse(0.1f, cos(float(u_Time) * 0.01f) * 0.5f + 0.5f);
-  //noiseInput += timeScale;
-
-  /* 
-  Ranges:
-  t = noise.r
-  t >= 0.65: Mountains
-  0.5 <= t < 0.65: Grassland
-  t < 0.5: Ocean
-
-  */
   float t = noise.r;
   float noiseScale = (t + perlinNoise) * when_ge(t, 0.65f) +
                      t * when_ge(t, 0.58f) * when_lt(t, 0.65f) +
@@ -334,10 +299,8 @@ void main()
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is
                                              // used to render the final positions of the geometry's vertices
 
-    // BEGIN TINKERING
 
     vec3 noisyModelPosition = noisePosition(modelposition.xyz);
-    
     gl_Position = u_ViewProj * vec4(noisyModelPosition, 1.0);
 
     // NORMAL CALCULATIONS //

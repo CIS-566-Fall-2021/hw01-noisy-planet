@@ -28,6 +28,8 @@ in vec4 fs_Pos;
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
 
+
+// NOISE FUNCTIONS //
 vec3 noise3D(vec3 p) {
     float val1 = fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 43758.5453);
 
@@ -88,6 +90,9 @@ vec3 fbm(float x, float y, float z) {
     return total;
 }
 
+// NOISE FUNCTIONS END //
+
+// TOOLBOX FUNCTIONS //
 float bias(float time, float bias) {
     return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
 }
@@ -99,7 +104,9 @@ float gain(float time, float gain) {
         return bias(time * 2.0 - 1.0, 1.0 - gain) / 2.0 + 0.5;
     }
 }
+// TOOLBOX FUNCTIONS END //
 
+// COLOR FUNCTIONS //
 vec3 rgb(float r, float g, float b) {
     return vec3(r / 255.f, g / 255.f, b / 255.f);
 }
@@ -113,42 +120,17 @@ const vec3 d = vec3(0.0, 0.1, 0.2);
 vec3 cosinePalette(float t) {
     return a + b * cos(6.2831 * (c * t + d));
 }
+// COLOR FUNCITONS END //
 
-vec4 when_eq(vec4 x, vec4 y) {
-  return 1.0 - abs(sign(x - y));
-}
-
-vec4 when_neq(vec4 x, vec4 y) {
-  return abs(sign(x - y));
-}
-
-vec4 when_gt(vec4 x, vec4 y) {
-  return max(sign(x - y), 0.0);
-}
-
-float when_gt(float x, float y) {
-  return max(sign(x - y), 0.0);
-}
-
-vec4 when_lt(vec4 x, vec4 y) {
-  return max(sign(y - x), 0.0);
-}
-
+// CONDITIONAL FUNCTIONS //
 float when_lt(float x, float y) {
   return max(sign(y - x), 0.0);
-}
-
-vec4 when_ge(vec4 x, vec4 y) {
-  return 1.0 - when_lt(x, y);
 }
 
 float when_ge(float x, float y) {
   return 1.0 - when_lt(x, y);
 }
-
-vec4 when_le(vec4 x, vec4 y) {
-  return 1.0 - when_gt(x, y);
-}
+// CONDITIONAL FUNCTIONS END //
 
 void main()
 {
@@ -166,8 +148,9 @@ void main()
                                                             //to simulate ambient lighting. This ensures that faces that are not
                                                             //lit by our point light are not completely black.
 
-        // BEGIN TINKERING
+        // Match noise function with vertex shader noise function
 
+        // Match noise with vertex shader noise
         vec3 noiseInput = fs_Pos.xyz;
         // Adjust this to change continent size
         noiseInput *= 1.0f * u_NoiseInput;
@@ -177,12 +160,14 @@ void main()
 
         vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 
+        // Color palette for world
         vec3 water = rgb(80.f, 80.f, 180.f);
         vec3 sand = rgb(237.f, 234.f, 149.f);
         vec3 grass = rgb(73.f, 166.f, 63.f);
         vec3 mountain = rgb(130.f, 130.f, 130.f);
         vec3 snow = rgb(220.f, 220.f, 220.f);
 
+        // Interpolation values
         float t = noise.r;
         float t2 = gain(t, 0.02f);
         float t3 = bias(t, 0.2f);

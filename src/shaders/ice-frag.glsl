@@ -16,7 +16,6 @@ uniform vec4 u_Color; // The color with which to render this instance of geometr
 uniform highp int u_Time;
 uniform highp float u_NoiseInput;
 uniform highp float u_AnimationSpeed;
-uniform vec4 u_Camera;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -28,6 +27,7 @@ in vec4 fs_Pos;
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
 
+// NOISE FUNCTIONS //
 vec3 noise3D(vec3 p) {
     float val1 = fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 43758.5453);
 
@@ -111,7 +111,7 @@ float surflet(vec3 p, vec3 gridPoint) {
     return height * t.x * t.y * t.z;
 }
 
-float perlinNoise3D(vec3 p) {
+float perlin(vec3 p) {
 	float surfletSum = 0.f;
 	// Iterate over the four integer corners surrounding uv
 	for(int dx = 0; dx <= 1; ++dx) {
@@ -123,7 +123,9 @@ float perlinNoise3D(vec3 p) {
 	}
 	return surfletSum;
 }
+// NOISE FUNCTIONS END //
 
+// TOOLBOX FUNCTIONS //
 float bias(float time, float bias) {
     return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
 }
@@ -135,25 +137,23 @@ float gain(float time, float gain) {
         return bias(time * 2.0 - 1.0, 1.0 - gain) / 2.0 + 0.5;
     }
 }
+// TOOLBOX FUNCTIONS END //
 
+// COLOR FUNCTIONS //
 vec3 rgb(float r, float g, float b) {
     return vec3(r / 255.f, g / 255.f, b / 255.f);
 }
 
 // Cosine palette variables
-const vec3 a = vec3(1.5084, -0.541, -0.241);
-const vec3 b = vec3(1.7984, -1.351, 1.0384);
-const vec3 c = vec3(0.1784, 0.2884, -0.571);
-const vec3 d = vec3(-0.761, 1.5384, -2.061);
-
-// const vec3 a = vec3(-0.311, -1.441, 0.5484);
-// const vec3 b = vec3(-2.201, -2.261, 0.4384);
-// const vec3 c = vec3(0.3184, -1.131, 1);
-// const vec3 d = vec3(0.6084, -0.531, 0.2584);
+const vec3 a = vec3(0.5, 0.5, 0.5);
+const vec3 b = vec3(-0.451, 0.5084, 0.5984);
+const vec3 c = vec3(0.4984, 0.7184, 0.1784);
+const vec3 d = vec3(0.0584, 0.3084, 0.8684);
 
 vec3 cosinePalette(float t) {
     return a + b * cos(6.2831 * (c * t + d));
 }
+// COLOR FUNCTIONS END //
 
 void main()
 {
@@ -171,14 +171,9 @@ void main()
                                                             //to simulate ambient lighting. This ensures that faces that are not
                                                             //lit by our point light are not completely black.
 
-        // Compute final shaded color
-        //out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
-
-        // BEGIN TINKERING
-
         vec3 noiseInput = fs_Pos.xyz;
         // Adjust this to change continent size
-        noiseInput *= 3.f * u_NoiseInput;
+        noiseInput *= 2.f * perlin(fbm(fs_Pos.x / 3.f, fs_Pos.y / 5.f, fs_Pos.z / 5.f) * 5.f) * u_NoiseInput;
 
         // Animation!
         noiseInput += float(u_Time) * 0.001 * u_AnimationSpeed;
@@ -186,21 +181,10 @@ void main()
         vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 
         vec3 surfaceColor = noise.rrr;
-
         float t = noise.r;
 
         t = gain(t, 0.02f);
 
         vec3 noiseColor = cosinePalette(t);
-
-        // BLINN-PHONG CALCULATIONS //
-        vec3 view = normalize(u_Camera.xyz - fs_Pos.xyz);
-        vec3 lightDirection = normalize(fs_LightVec.xyz - fs_Pos.xyz);
-        vec3 h = (lightDirection + view) / 2.f;
-        float shininess = 2.f;
-        vec3 specularColor = rgb(200.f, 55.f, 55.f);
-        vec3 blinnPhong = max(pow(dot(h, fs_Nor.xyz), shininess), 0.f) * specularColor;
-        // BLINN-PHONG CALCULATIONS END //
-
-        out_Col = vec4(noiseColor * lightIntensity + blinnPhong, diffuseColor.a);
+        out_Col = vec4(noiseColor, diffuseColor.a);
 }

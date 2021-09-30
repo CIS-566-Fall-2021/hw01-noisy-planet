@@ -40,6 +40,7 @@ out vec4 fs_Pos;
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
 
+// NOISE FUNCTIONS //
 vec3 noise3D(vec3 p) {
     float val1 = fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 43758.5453);
 
@@ -135,7 +136,9 @@ float perlin(vec3 p) {
 	}
 	return surfletSum;
 }
+// NOISE FUNCTIONS END //
 
+// ROTATION FUNCTIONS //
 float degreesToRadians(float deg) {
     return deg * 3.14159265359f / 180.f;
 }
@@ -160,7 +163,9 @@ mat4 rotateZ(float angle) {
 				0, 0, 1, 0,
 				0, 0, 0, 1);
 }
+// ROTATION FUNCTIONS END //
 
+// TOOLBOX FUNCTIONS //
 float bias(float time, float bias) {
     return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
 }
@@ -172,7 +177,9 @@ float gain(float time, float gain) {
         return bias(time * 2.0 - 1.0, 1.0 - gain) / 2.0 + 0.5;
     }
 }
+// TOOLBOX FUNCTIONS END //
 
+// Takes a point and transforms its position using noise functions
 vec3 noisePosition(vec3 p) {
     vec3 noiseInput = p.xyz;
     noiseInput *= 3.f * u_NoiseInput;
@@ -196,19 +203,10 @@ vec3 noisePosition(vec3 p) {
     return noisyModelPosition;
 }
 
-// Cosine palette variables
-const vec3 a = vec3(0.5, 0.5, 0.5);
-const vec3 b = vec3(0.5, 0.5, 0.5);
-const vec3 c = vec3(1.0, 1.0, 1.0);
-const vec3 d = vec3(0.0, 0.1, 0.2);
-
-vec3 cosinePalette(float t) {
-    return a + b * cos(6.2831 * (c * t + d));
-}
-
 void main()
 {
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
+    fs_Pos = vs_Pos;
 
     mat3 invTranspose = mat3(u_ModelInvTr);
     fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);          // Pass the vertex normals to the fragment shader for interpolation.
@@ -228,13 +226,11 @@ void main()
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is
                                              // used to render the final positions of the geometry's vertices
 
-    // BEGIN TINKERING
 
     vec3 noisyModelPosition = noisePosition(modelposition.xyz);
 
     gl_Position = u_ViewProj * vec4(noisyModelPosition, 1.0);
 
-    // END TINKERING
     // NORMAL CALCULATIONS //
     // Get tangent and bitangent
     vec3 tangent = cross(vec3(0.f, 1.f, 0.f), fs_Nor.xyz);
@@ -257,6 +253,4 @@ void main()
     vec3 newNorm = cross(normalize(p5 - p6), normalize(p7 - p8));
     fs_Nor = vec4(newNorm, 0);
     // NORMAL CALCULATIONS END //
-
-    fs_Pos = vs_Pos;
 }

@@ -86,33 +86,33 @@ function main() {
   renderer.setClearColor(20 / 255, 19 / 255, 36 / 255, 1);
     gl.enable(gl.DEPTH_TEST);
 
-  const lambert = new ShaderProgram([
+  const earth = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/earth-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/earth-frag.glsl')),
   ]);
 
-  const lambertDeform = new ShaderProgram([
+  const molten = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/molten-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/molten-frag.glsl')),
+  ]);
+
+  const ice = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/ice-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/ice-frag.glsl')),
+  ]);
+
+  const starburst = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/starburst-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/starburst-frag.glsl')),
   ]);
 
-  const noise = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/biome3-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/biome3-frag.glsl')),
-  ]);
-
-  const noiseDeform = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/biome4-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/biome4-frag.glsl')),
-  ]);
-
-  currShader = lambert;
+  currShader = earth;
 
   function updateColor() {
     let col = vec4.fromValues(controls.Color[0] / 255,
                               controls.Color[1] / 255,
                               controls.Color[2] / 255, 1);
-    renderer.render(camera, lambert, [cube], col, time);
+    renderer.render(camera, earth, [cube], col, time);
   }
 
 
@@ -136,13 +136,13 @@ function main() {
     if (controls.Planet != prevShader) {
       prevShader = controls.Planet;
       if (controls.Planet == 1) {
-        currShader = lambert;
+        currShader = earth;
       } else if (controls.Planet == 2) {
-        currShader = lambertDeform;
+        currShader = molten;
       } else if (controls.Planet == 3) {
-        currShader = noise;
+        currShader = ice;
       } else if (controls.Planet == 4) {
-        currShader = noiseDeform;
+        currShader = starburst;
       }
       currShader.setNoiseInput(1);
       currShader.setAnimationSpeed(controls.AnimationSpeed);
