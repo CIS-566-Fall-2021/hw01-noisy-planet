@@ -13,6 +13,23 @@ Live Demo Link:
   <img src="https://user-images.githubusercontent.com/6472567/135378046-0cac887b-1d09-4106-badd-86cccf5c6aed.png">
 </p>
 <p align="center">Planet Angle 2</p>
+[Live Demo](https://ciscprocess.github.io/hw01-noisy-planet/)
+
+### Algorithm Descriptions
+The planet is formed first with one main 3D Perlin noise function with fBM, normalized to a range of [0, 1] an 4 rounds of composition. Cutoff values that define the biome are then decided by the following uniform variables:
+- `u_GrassCutoff`: If the main noise function is above this value at the given point, then render the point with a grass color pallette and with deformed normals. Below, render as ocean (see below).
+- `u_MountainCutoff`: If the main noise functino is above this value, render with the mountain color pallete. ADDITIONALLY, note that the mountains have some green texturing, attempting to simulate moss, on sides with normals pointing to the left. This is achieved by dotting the normal vector with the left world vector, and coloring based on a threshold.
+- `u_ForestCutoff`: If the mountain threshold is not met, then another noise function, AVERAGED with the main noise function is calculated. If this passes the threshold defined here, and the threshold listed below is passed, the terrain is rendered as forest. 
+- `u_MountainSpacing`: This requires that for a point to be rendered as "forest", then the main noise function must be at least this amount BELOW the mountain cutoff. This is to prevent forests from spawning in the middle of mountain ranges, creating ugly boundaries.
+
+The main terrain and mountain areas are colored by a single cosine color palette containing a range from green, brownish, to gray. Normals and Blinn-Phong shading give a shiny texture. Forests are colored with a darker forest palette and have simple white noise applied. I wish I could have done a better job with this, but there was no time. Note that normals are not as sharp on forests: I averaged the deformed normals with the originals to simulate the dampening effect trees may have on the terrains ridges.
+
+The ocean is probably the most compelling part of this tiny planet: It is generated with a largely blue, but with a little green at higher bands, color palette in conjucntion with warped perlin noise: 3 perlin noise samples are collected at the given point and then are used to offset the point being input into another perlin noise function. This provides the marble-like texture. Then, a gain function is used before feeding to the color palette to push the exremeties to the edge of the planet, providing a semi-transparent, marble-like look. Finally, the look vector is factored into the color palette (via dot product with ocean surface normal) to provide iridescence. The ocean is animated by pushing the perlin noise input through the Z-axis over time.
+
+
+### Sources
+- [Noise Functions](https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83)
+- [Bad Noise Function](https://stackoverflow.com/a/28095165)
 
 ## Objective
 - Continue practicing WebGL and Typescript
