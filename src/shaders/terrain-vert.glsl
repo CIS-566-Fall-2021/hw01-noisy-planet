@@ -38,9 +38,7 @@ out vec4 fs_Nor;            // The array of normals that has been transformed by
 out vec4 fs_LightVec;       // The direction in which our virtual light lies, relative to each vertex. This is implicitly passed to the fragment shader.
 out vec4 fs_Col;            // The color of each vertex. This is implicitly passed to the fragment shader.
 out vec4 fs_Pos;
-out float biome_type;
 out vec4 modelposition;
-out float flower_type;
 
 vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
@@ -237,34 +235,24 @@ vec4 computeTerrain() {
 
     if (biomeMap < 0.2) { // water
         fs_Nor = vs_Nor;
-        biome_type = 0.0;
     } else if (biomeMap < 0.3) { // grass
         float x = GetBias((biomeMap - 0.2) / 0.1, 0.3);
         noisePos = mix(vs_Pos, grassElevation, x);
-        fs_Nor = transformToWorld(normalize(mountainNormals(vs_Pos, 1.1)));
-        biome_type = 1.0;
+        fs_Nor = transformToWorld(normalize(mountainNormals(vs_Pos, 1.9)));
     } else if (biomeMap < 0.4) { // desert
         float x = GetBias((biomeMap - 0.3) / 0.1, 0.7);
         noisePos = mix(grassElevation, desertElevation, x);
         fs_Nor = transformToWorld(normalize(mountainNormals(vs_Pos, 2.0)));
-        biome_type = 2.0;
     } else if (biomeMap < 0.5) { // mountain
         float x = GetBias((biomeMap - 0.4) / 0.1, 0.3);
         noisePos = mix(desertElevation, mountainElevation, x);
         fs_Nor = transformToWorld(normalize(mountainNormals(vs_Pos, 3.0)));
-        biome_type = 3.0;
     } else { // ice
-          float x = GetBias((biomeMap - 0.5) / 0.5, 0.3);
+        float x = GetBias((biomeMap - 0.5) / 0.5, 0.3);
         noisePos = mix(mountainElevation, iceElevation, x);
         fs_Nor = transformToWorld(normalize(mountainNormals(vs_Pos, 4.0)));
-        biome_type = 4.0;
     }
 
-    float flowerMap = pow(fbm(tInput.x, tInput.y, tInput.z, 6.0),5.f) * u_Flower;
-    if (flowerMap > 0.1) {
-      flower_type = 1.0;
-    }
-    
     return noisePos;
 }
 
@@ -287,7 +275,7 @@ void main()
 
     //rotate the light source
 
-    float a =  float(u_Time) * 0.002 * u_LightSpeed;
+    float a =  float(u_Time) * 0.008 * u_LightSpeed;
     vec4 c0 = vec4(cos(a), 0, -1.*sin(a), 0);
     vec4 c1 = vec4(0, 1, 0, 0);
     vec4 c2 = vec4(sin(a), 0, cos(a), 0);

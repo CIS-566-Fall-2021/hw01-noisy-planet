@@ -13,9 +13,12 @@ precision highp float;
 
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 uniform highp int u_Time;
+
 uniform highp float u_LightSpeed;
 
 uniform highp float u_MountainHeight;
+
+uniform highp float u_Flower;
 
 uniform vec4 u_CamPos;
 // These are the interpolated values out of the rasterizer, so you can't know
@@ -25,11 +28,12 @@ in vec4 fs_LightVec;
 in vec4 fs_Col;
 in vec4 fs_Pos;
 in vec4 modelposition;
-in float biome_type;
-in float flower_type;
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
 
+
+float fs_biome_type;
+float fs_flower_type;
 
 float ease_in_quadratic(float t){
     return t*t;
@@ -102,11 +106,75 @@ vec3 rgb(float r, float g, float b) {
     return vec3(r / 255.0, g / 255.0, b / 255.0);
 }
 
+vec3 random3(vec3 p) {
+ return fract(sin(vec3(dot(p,vec3(127.1, 311.7, 191.999)),
+                        dot(p,vec3(269.5, 183.3, 765.54)),
+                        dot(p, vec3(420.69, 631.2,109.21))))
+                *43758.5453);
+}
+
+float worley(vec3 p) {
+  vec3 pInt = floor(p);
+  vec3 pFract = fract(p);
+  float minDist = 1.0;
+  for (int x = -1; x <= 1; x++) {
+    for (int y = -1; y <= 1; y++) {
+      for (int z = -1; z <= 1; z++) {
+        vec3 neighbor = vec3(float(x), float(y), float(z));
+        vec3 voronoi = random3(pInt + neighbor);
+        //voronoi = 0.5 + 0.5 * sin(0.1 * float(u_Time) + 13.2831 * voronoi);
+        vec3 diff = neighbor + voronoi - pFract;
+        float dist = length(diff);
+        minDist = min(minDist, dist);
+      }
+    }
+  }
+  return 1.0 - minDist;
+}
+
+
+
+float surflet(vec3  p, vec3 gridPoint) {
+    vec3 t2 = abs(p - gridPoint);
+    vec3 t;
+    t.x = 1.f - 6.f * pow(t2.x, 5.f) + 15.f * pow(t2.x, 4.f) - 10.f * pow(t2.x, 3.f);
+    t.y = 1.f - 6.f * pow(t2.y, 5.f) + 15.f * pow(t2.y, 4.f) - 10.f * pow(t2.y, 3.f);
+    t.z = 1.f - 6.f * pow(t2.z, 5.f) + 15.f * pow(t2.z, 4.f) - 10.f * pow(t2.z, 3.f);
+
+    vec3 gradient = random3(gridPoint) * 2. - vec3(1.);
+
+    vec3 diff = p - gridPoint;
+    float height = dot(diff, gradient);
+    return height * t.x * t.y * t.z;
+}
+
+
+
+float summedPerlin(vec4 p)
+{   
+    p = p * 2.5;
+    float sum = 0.0;
+    for(int dx = 0; dx <= 1; ++dx) {
+        for (int dy = 0; dy <= 1; ++dy) {
+           for (int dz = 0; dz <= 1; ++dz) {
+               sum += surflet(vec3(p), floor(vec3(p)) + vec3(dx, dy, dz));
+           } 
+        }
+    }
+    
+    return sum / 6.0;
+}
+
+float mountainNoise(vec4 p, float factor) {
+    return summedPerlin(p * factor);
+}
+
+
 
 vec3 waterSlime() {
     float f = fbm(fs_Pos.x, fs_Pos.y, fs_Pos.z, 6.);
     vec4 f2 =  fs_Pos + f; 
-    f = fbm(f2.x  + .003 * float(u_Time), f2.y  + .003 * float(u_Time), f2.z, 6.);
+    f = fbm(f2.x  + .003 * float(u_Time), f2.y  + .01 * float(u_Time), f2.z, 6.);
     f = ease_in_out_quadratic(f);
     vec3 a = vec3(0.35, 1.84, 0.35);
     vec3 b = vec3(0.4 , -0.41, 0.5);
@@ -139,7 +207,6 @@ vec3 desertPink() {
     return color;
 }
 
-
 vec3 mountainLilac() {
 
     float f = fbm(fs_Pos.x * 2.1, fs_Pos.y * 2.1, fs_Pos.z * 2.1, 16.);
@@ -164,13 +231,70 @@ vec3 iceBlue() {
 
 vec3 flowerYellow() {
     float f = fbm(fs_Pos.x * 10.5, fs_Pos.y * 10.5, fs_Pos.z * 10.5, 16.);
-    vec3 a = vec3(0.731, 1.098, 0.192);
-    vec3 b = vec3(0.358, 1.09, 0.65);
-    vec3 c = vec3(1.077, 0.36, 0.328);
-    vec3 d = vec3(0.965, 2.265, 0.837);
+    vec3 a = vec3(-0.371, 1.12, 0.88);
+    vec3 b = vec3(1.07, 0.59, 0.78);
+    vec3 c = vec3(0.35, 0.33, 0.5);
+    vec3 d = vec3(0.64, 1.07, 0.5);
     vec3 color = a + b * cos(6.28 * (f * c + d));  
     return color;
 }
+
+
+float GetBias(float time, float bias)
+{
+    return (float(time) / ((((1.0/bias) - 2.0)*(1.0 - float(time)))+1.0));
+}
+
+float GetGain(float time, float gain)
+{
+  if(time < 0.5)
+    return GetBias(time * 2.0,gain)/2.0;
+  else
+    return GetBias(time * 2.0 - 1.0,1.0 - gain)/2.0 + 0.5;
+}
+
+
+
+
+float computeTerrain() {
+    // use noise functions to create four biomes
+    // land, water, ice, mountains
+    vec3 tInput = fs_Pos.xyz * vec3(0.5 * u_MountainHeight);
+    vec3 t = vec3(fbm(tInput.x, tInput.y, tInput.z, 6.0));
+    float biomeMap = worley(vec3(fbm(tInput.x, tInput.y, tInput.z, 6.0)));
+    biomeMap = GetGain(biomeMap, 0.4f);
+    float noisePos = 0.0;
+    float grassElevation = summedPerlin(fs_Pos * 1.1);
+    float desertElevation = summedPerlin(fs_Pos * 2.0);
+    float mountainElevation = mountainNoise(fs_Pos, 3.0);
+    float iceElevation =  mountainNoise(fs_Pos, 4.0);
+    
+
+    if (biomeMap < 0.2) { // water
+        fs_biome_type = 0.;
+    } else if (biomeMap < 0.3) { // grass
+        float x = GetBias((biomeMap - 0.2) / 0.1, 0.3);
+        noisePos = mix(0.0, grassElevation, x);
+        fs_biome_type = 1.;
+    } else if (biomeMap < 0.4) { // desert
+        float x = GetBias((biomeMap - 0.3) / 0.1, 0.7);
+        noisePos = mix(grassElevation, desertElevation, x);
+        fs_biome_type = 2.;
+    } else if (biomeMap < 0.5) { // mountain
+        float x = GetBias((biomeMap - 0.4) / 0.1, 0.3);
+        noisePos = mix(desertElevation, mountainElevation, x);
+        fs_biome_type = 3.;
+    } else { // ice
+          float x = GetBias((biomeMap - 0.5) / 0.5, 0.3);
+        noisePos = mix(mountainElevation, iceElevation, x);
+        fs_biome_type = 4.;
+    }
+
+    
+    
+    return noisePos;
+}
+
 
 
 void main()
@@ -193,7 +317,8 @@ void main()
         vec4 view = vec4(normalize(u_CamPos.xyz - fs_Pos.xyz), 1.);
         vec4 H = normalize(view + vec4(normalize(fs_LightVec.xyz), 1.));
         vec3 specularIntensity = pow(max(dot(H, normalize(fs_Nor)), 0.), 100.) * rgb(240., 243., 220.);
-                                           
+        float noisePos = computeTerrain();
+                           
         // palette
         vec3 grassPurple = grassPurple();
         vec3 mountainLilac = mountainLilac();
@@ -201,24 +326,30 @@ void main()
         vec3 desertPink = desertPink();
         vec3 waterSlime = waterSlime();
         vec3 color;
-        if (biome_type <= 0.0) { // water
+        if (fs_biome_type <= 0.0) { // water
             color = waterSlime;
-        } else if (biome_type <= 1.0) { // grass
+        } else if (fs_biome_type <= 1.0) { // grass
             color = mix(waterSlime, grassPurple, 0.9);
             specularIntensity = vec3(0.);
-        } else if (biome_type <= 2.0) { // desert
+        } else if (fs_biome_type <= 2.0) { // desert
             color = mix(grassPurple, desertPink, 0.3);
             specularIntensity = vec3(0.);
-        } else if (biome_type <= 3.0) { // mountain
+        } else if (fs_biome_type <= 3.0) { // mountain
             color = mix(desertPink, mountainLilac, 0.3);
-        } else if (biome_type <= 4.0){ // ice
+        } else if (fs_biome_type <= 4.0){ // ice
             color = mix(mountainLilac, iceBlue, 0.99);
         } else {
             color = iceBlue;
         }
+        vec3 tInput = fs_Pos.xyz * vec3(0.5 * u_MountainHeight);
 
-        if (flower_type == 1.0) {
-            color = flowerYellow();
+        float flowerMap = pow(fbm(tInput.x, tInput.y, tInput.z, 6.0),5.f) * u_Flower; 
+
+        if (flowerMap > 0.1) {
+            vec3 flowerCol = flowerYellow();
+            if (flowerCol.r > 0.3) {
+                color = flowerCol;
+            }
         }
 
         out_Col = vec4(color * lightIntensity + specularIntensity, 1.0);
