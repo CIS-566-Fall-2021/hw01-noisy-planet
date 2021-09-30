@@ -2,7 +2,8 @@
 
 ## Results
 ![Image1](https://github.com/QennyS/hw01-noisy-planet/blob/master/NoisyPlanet2.gif) 
-Live link: https://qennys.github.io/hw01-noisy-planet/
+Live link: https://qennys.github.io/hw01-noisy-planet/ \
+Name: Yilei Li PennKey: 47053708
 
 ### Implementation details
 #### Biomes
