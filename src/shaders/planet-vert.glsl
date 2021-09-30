@@ -80,7 +80,7 @@ float interpolateNoise3D(float x, float y, float z)
     return i7;
 }
 
-float fbmNoise(float x, float y, float z)
+float fbmNoise(vec3 v)
 {
     float total = 0.0;
     float persistence = 0.3;
@@ -89,7 +89,7 @@ float fbmNoise(float x, float y, float z)
     int octaves = 4;
 
     for (int i = 1; i <= octaves; i++) {
-        total += amplitude * interpolateNoise3D(frequency * x, frequency * y, frequency * z);
+        total += amplitude * interpolateNoise3D(frequency * v.x, frequency * v.y, frequency * v.z);
         frequency *= 2.0;
         amplitude *= persistence;
     }
@@ -254,7 +254,7 @@ void main()
                                                             // perpendicular to the surface after the surface is transformed by
                                                             // the model matrix.
 
-
+    
     vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
 
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
@@ -264,9 +264,9 @@ void main()
     //begin tinkering
 
     vec3 noiseInput = modelposition.xyz;
-    noiseInput += getAnimation();
+    //noiseInput += getAnimation();
 
-    vec3 noise = fbmNoise(noiseInput.x, noiseInput.y, noiseInput.z) * noiseInput;
+    vec3 noise = fbmNoise(noiseInput) * noiseInput;
     
     float noiseScale = noise.r;
 
@@ -277,6 +277,29 @@ void main()
 
     vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
     vec3 noisyModelPosition = modelposition.xyz + 0.075 * offsetAmount;
+
+    //CALCULATE NEW NORMAL
+    // float epsilon = 0.0001;
+    
+    // vec3 tangent = normalize(cross(vec3(0.0, 1.0, 0.0), vec3(vs_Nor)));
+
+    // vec3 bitangent = normalize(cross(vec3(vs_Nor), tangent));
+
+    // vec3 tangentPosition = vec3(vs_Pos) + (tangent * epsilon);
+    // float fbmT = fbmNoise(tangentPosition);
+    // vec3 tangentNorm = normalize(tangentPosition);
+    // vec3 noiseTangent = tangentNorm * fbmT * tangentNorm;
+
+    // vec3 bitangentPosition = vec3(vs_Pos) + (bitangent * epsilon);
+    // float fbmB = fbmNoise(bitangentPosition);
+    // vec3 bitangentNorm = normalize(bitangentPosition);
+    // vec3 noiseBitangent = bitangentNorm * fbmB * bitangentNorm;
+
+    // fs_Nor = vec4(normalize(cross(normalize(noisyModelPosition - noiseTangent),
+    //                                 normalize(noisyModelPosition - noiseBitangent))),
+    //                                 0.0);
+    fs_Nor = vs_Nor;
+    //fs_Nor = getNewNormal(vs_Nor);
 
     gl_Position = u_ViewProj * vec4(noisyModelPosition, 1.0);
 
