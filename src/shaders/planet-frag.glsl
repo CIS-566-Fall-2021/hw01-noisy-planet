@@ -331,12 +331,10 @@ void main()
         noiseInput2 += getAnimation();
         float noiseScale2 =  fbmNoise2(noiseInput2);
         if (noiseScale2 > 0.6) {
-            surfaceColor += vec3(1,0,1);
-        }
+            surfaceColor += vec3(0.5,0.0,0.4);
+        } 
     } else if (isDeepSea){
         vec3 deepSeaColor = convertRGB(0.0, 18.0, 14.0);
-        //vec3 deepSeaColor = dsa + dsb * cos(6.3 * (dsc * rt + dsd));
-        //surfaceColor = mix(deepSeaColor, surfaceColor, 0.65);
 
         vec3 noiseInput2 = fs_Pos.xyz;
         noiseInput2 += getAnimation();
@@ -344,7 +342,6 @@ void main()
         if (noiseScale2 > 0.4) {
             surfaceColor = mix(deepSeaColor, surfaceColor, 0.9);
         }
-        //surfaceColor = deepSeaColor;
     }
 
     diffuseColor = vec4(surfaceColor.xyz, 1.0);
@@ -352,16 +349,14 @@ void main()
     // Compute final shaded color
     if (!isBlinn) {
         out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
-        //out_Col = vec4(noise.rgb, 1.0);
     } else {
         //BLINN PHONG SHADING
         vec4 camVec = normalize(vec4(vec3(u_Camera) - vec3(fs_Pos), 0.0));
         vec4 lightVec = normalize(vec4(vec3(u_Camera) - vec3(fs_LightVec), 0.0));
         vec4 avg_h = vec4((camVec + lightVec) / 2.0);
-        //vec3 lightColor = vec3(0.0, 0.6, 1.0);
-        float specIntensity = (pow(max(dot(normalize(avg_h), normalize(fs_Nor)), 0.0), 8.0));
+        float specIntensity = (pow(max(dot(normalize(avg_h), normalize(fs_Nor)), 0.0), 20.0));
         
-        // Compute final shaded color
+        // Compute final shaded colo2
         out_Col = vec4(diffuseColor.rgb * (lightIntensity + specIntensity), diffuseColor.a);
     } 
 

@@ -71,8 +71,6 @@ function main() {
 
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
 
-
-
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(255.0 / 255.0, 217.0 / 255.0, 241.0 / 255.0, 1.0);
   gl.enable(gl.DEPTH_TEST);
