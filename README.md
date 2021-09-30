@@ -14,7 +14,7 @@
       - 30 ~ 50: Dessert
       - Above 50: Lava
   - <img height="360" src="img/HW01-Earth.png">
-  - <img height="360" src="img/HW01-Lava Planet.png">
+  - <img height="360" src="img/HW01-Lava Planet.png"> 
 - Live Demo Link: 
 
 ## Objective
