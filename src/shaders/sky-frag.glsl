@@ -1,10 +1,12 @@
-#version 150
+#version 300 es
 
 uniform mat4 u_ViewProj;    // We're actually passing the inverse of the viewproj
 // from our CPU, but it's named u_ViewProj so we don't
 // have to bother rewriting our ShaderProgram class
 
-uniform ivec2 u_Dimensions; // Screen dimensions
+// uniform ivec2 u_Dimensions; // Screen dimensions
+
+ivec2 u_Dimensions = ivec3(800,1280);
 
 uniform vec3 u_CameraPos; // Camera pos
 

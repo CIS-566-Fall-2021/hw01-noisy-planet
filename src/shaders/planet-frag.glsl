@@ -64,21 +64,35 @@ void main()
 
         //ocean - blue
         vec4 oceanCol = mix(diffuseColor, vec4(0.22, 0.3, 0.58,1.0),ease_in_quadratic(fs_noise));
-        float oceanMax = 0.75;
-        //terrain - green
         vec4 terrainCol = vec4(0.35, 0.5, 0.31,1.0);
+        vec4 mountainCol = vec4(0.64, 0.56, 0.43,1.0);
+        vec4 iceCol = vec4(0.96, 0.99,1.0,1.0);
+
+        float oceanMax = 0.75;
         float terrainMax = 0.9;
+        float mountainMax = 1.05;
+
+        if(u_ShadingModel == 5){
+          oceanCol = vec4(0.2,0.2,0.2,1.0);
+          terrainCol = vec4(0.4,0.4,0.4,1.0);
+          mountainCol = vec4(0.6,0.6,0.6,1.0);
+          iceCol = vec4(0.8,0.8,0.8,1.0);
+          oceanMax = 0.6;
+        } else if (u_ShadingModel == 6){
+          oceanCol = vec4(0.13,0.13,0.23,1.0);
+          terrainCol = vec4(0.02,0.07,0.07,1.0); 
+          mountainCol = vec4(0.98,0.9,0.7,1.0)+sin(time*0.02);
+          iceCol = vec4(0.05,0.10,0.15,1.0);
+          mountainMax = 0.90+0.4*sin(time*0.05);
+        }
         
+        //terrain - green
         float t1 = smoothstep(oceanMax, terrainMax, fs_noise);
         terrainCol = mix(oceanCol, terrainCol,t1);
         //mountain ranges - yellow
-        vec4 mountainCol = vec4(0.64, 0.56, 0.43,1.0);
-        float mountainMax = 1.05;
-
         float t2 = smoothstep(terrainMax, mountainMax, fs_noise);
         mountainCol = mix(terrainCol, mountainCol,t2);
         //ice cap - white
-        vec4 iceCol = vec4(0.96, 0.99,1.0,1.0);
         float t3 = smoothstep(mountainMax, mountainMax+0.1, fs_noise);
         iceCol = mix(mountainCol, iceCol,t3);
 
@@ -94,12 +108,15 @@ void main()
         vec4 nor = fs_Nor;
         nor.xyz =  normalize(cross(dFdx(fs_Pos.xyz),dFdy(fs_Pos.xyz)));
 
+
+        vec4 lightDir = fs_LightVec;
         // Calculate the diffuse term for different shading
-        float diffuseTerm = dot(normalize(nor), normalize(fs_LightVec));
+        float diffuseTerm = dot(normalize(nor), normalize(lightDir));
         // Avoid negative lighting values
         diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);
         float ambientTerm = 0.25*float(u_Light);
         float lightIntensity = (diffuseTerm + ambientTerm) ;
+        
 
 
         if(u_ShadingModel == 1){
@@ -118,6 +135,7 @@ void main()
           out_Col = vec4(diffuseColor.rgb * ambientTerm, diffuseColor.a);
         } else if (u_ShadingModel == 3){
           // diffuse
+          
           out_Col = vec4(diffuseColor.rgb * diffuseTerm, diffuseColor.a);
         } else {
           //lambert

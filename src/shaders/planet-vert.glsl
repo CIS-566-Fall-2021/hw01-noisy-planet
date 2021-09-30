@@ -79,12 +79,17 @@ float noise(vec3 p){
 // }
 
 #define NUM_OCTAVES u_Shift
+
 float fbm(vec3 x) {
     float time = float(u_Time);
 	float v = 0.0;
 	float a = 0.9; //0.5
 	vec3 shift = vec3(100) + cos(time*0.001);
-	for (int i = 0; i < NUM_OCTAVES; ++i) {
+    int o = NUM_OCTAVES;
+    if (u_ShadingModel == 6){
+       o+=5;
+    }
+	for (int i = 0; i < o; ++i) {
 		v += a * noise(x);
 		x = x * 2.25 + shift; //2.0
 		a *= 0.55; //0.5
@@ -121,7 +126,10 @@ void main()
     float mult = float(u_Height) * 0.1;
 
     if(u_ShadingModel == 4){
-        threshold = 0.75 + gain(0.75, abs(sin(time*0.005))-0.05);
+        threshold = 0.75 + gain(0.75, abs(sin(time*0.03))-0.05);
+    } else if (u_ShadingModel == 5){
+        // threshold = 0.9;
+        mult *= 0.1;
     }
  
     if(warp_noise > threshold){

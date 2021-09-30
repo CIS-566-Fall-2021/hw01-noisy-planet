@@ -32,7 +32,7 @@ let prevTesselations: number = 5;
 function loadScene() {
   icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
   icosphere.create();
-  square = new Square(vec3.fromValues(0, 0, 0));
+  square = new Square(vec3.fromValues(-5, -5, -5));
   square.create();
   cube = new Cube(vec3.fromValues(0, 0, 0));
   cube.create();
@@ -56,7 +56,7 @@ function main() {
   gui.add(controls, 'height', 1, 15).step(1);
   gui.add(controls, 'octaves', 3, 10).step(1);
   gui.add(controls, 'ambient_light', 1, 5).step(0.1);
-  gui.add(controls, 'mode', { lambert: 0, 'blinn-phong': 1, 'ambient-only': 2, 'diffuse-only': 3, pulsing: 4 });
+  gui.add(controls, 'mode', { lambert: 0, 'blinn-phong': 1, 'ambient-only': 2, 'diffuse-only': 3, pulsing: 4, 'ink-wash': 5, 'night-light': 6 });
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement>document.getElementById('canvas');
@@ -73,11 +73,15 @@ function main() {
 
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
 
-  // const renderer = new OpenGLRenderer(canvas);
-  // renderer.setClearColor(0.9, 1.0, 1.0, 1);
-
   const renderer = new OpenGLRenderer(canvas);
-  renderer.setClearColor(0.9, 1.0, 1.0, 1);
+  renderer.setClearColor(0.0, 0.0, 0.0, 1);
+  canvas.height;
+  canvas.width;
+
+  // const background = new ShaderProgram([
+  //   new Shader(gl.VERTEX_SHADER, require('./shaders/sky-vert.glsl')),
+  //   new Shader(gl.FRAGMENT_SHADER, require('./shaders/sky-frag.glsl')),
+  // ]);
 
   gl.enable(gl.DEPTH_TEST);
 

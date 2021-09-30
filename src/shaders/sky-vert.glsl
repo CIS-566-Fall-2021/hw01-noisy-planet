@@ -1,4 +1,4 @@
-#version 150
+#version 300 es
 
 in vec4 vs_Pos;
 out vec4 fs_Pos;
