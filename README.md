@@ -1,6 +1,7 @@
 # CIS 566 Project 1: Noisy Planets
 
 Name: Eddie Huang
+
 PennKey: huanged
 
 Earth:
@@ -17,6 +18,7 @@ Startburst:
 
 Project Description:
 
+The four biomes on the Earth are mountain, forest, beach, and ocean. The toolbox functions I used are sin/cos, bias, gain, and pulse. The GUI additions I made were a slider to change the planet, a slider to change the multiplier of the noise input, a slider to change the animation speed, and sliders to rotate the light source around if the planet has a shader model.
 
 
 ## Objective
