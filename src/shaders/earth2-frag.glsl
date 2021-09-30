@@ -14,6 +14,7 @@ precision highp float;
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 
 uniform highp int u_Time;
+uniform vec4 u_Camera;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -204,19 +205,14 @@ void main()
                            sand * when_ge(t, 0.7f) * when_lt(t, 0.8f) +
                            waterSand * when_lt(t, 0.7f);
 
+        // BLINN-PHONG CALCULATIONS //
+        vec3 view = normalize(u_Camera.xyz - fs_Pos.xyz);
+        vec3 lightDirection = normalize(fs_LightVec.xyz - fs_Pos.xyz);
+        vec3 h = (lightDirection + view) / 2.f;
+        float shininess = 5.f;
+        vec3 specularColor = rgb(55.f, 55.f, 55.f);
+        vec3 blinnPhong = max(pow(dot(h, fs_Nor.xyz), shininess), 0.f) * specularColor;
+        // BLINN-PHONG CALCULATIONS END //
 
-        /*
-        if (t > 0.93) {
-            surfaceColor = mountainSnow;
-        } else if (t > 0.9) {
-            surfaceColor = mix(mountainSnow, grassMountain, t);
-        } else if (t > 0.85) {
-            surfaceColor = grassMountain;
-        } else if (t > 0.8) {
-            surfaceColor = mix(grassMountain, waterGrass, t);
-        } else {
-            surfaceColor = waterGrass;
-        }*/
-
-        out_Col = vec4(resultColor, diffuseColor.a);
+        out_Col = vec4(resultColor * lightIntensity + blinnPhong, diffuseColor.a);
 }

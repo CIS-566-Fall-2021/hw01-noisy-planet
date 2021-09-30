@@ -190,9 +190,30 @@ vec4 when_le(vec4 x, vec4 y) {
   return 1.0 - when_gt(x, y);
 }
 
+vec3 noisePosition(vec3 p) {
+  vec3 noiseInput = p.xyz;
+  noiseInput *= 1.0f;
+
+  // Animation!
+  //noiseInput += float(u_Time) * 0.001;
+
+  vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
+
+  //float timeScale = impulse(0.1f, cos(float(u_Time) * 0.01f) * 0.5f + 0.5f);
+  //noiseInput += timeScale;
+  vec3 noiseTime = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
+
+  float noiseScale = noise.r * when_ge(noise.r, 0.5f) +
+                     0.46f * when_lt(noise.r, 0.5f);
+  vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
+  vec3 noisyModelPosition = p.xyz + offsetAmount;
+  return noisyModelPosition;
+}
+
 void main()
 {
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
+    fs_Pos = vs_Pos;
 
     mat3 invTranspose = mat3(u_ModelInvTr);
     fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);          // Pass the vertex normals to the fragment shader for interpolation.
@@ -224,15 +245,33 @@ void main()
     vec3 noiseTime = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 
     float noiseScale = noise.r * when_ge(noise.r, 0.5f) +
-                       0.46f * when_ge(noise.r, 0.4f) * when_lt(noise.r, 0.5f) +
-                       (0.25f + noiseTime.r * 0.5f) * when_lt(noise.r, 0.4f);
+                       0.46f * when_lt(noise.r, 0.5f);
     vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
     vec3 noisyModelPosition = modelposition.xyz + offsetAmount;
+    
 
     gl_Position = u_ViewProj * vec4(noisyModelPosition, 1.0);
 
-    // END TINKERING
+    // NORMAL CALCULATIONS //
+    // Get tangent and bitangent
+    vec3 tangent = cross(vec3(0.f, 1.f, 0.f), fs_Nor.xyz);
+    vec3 bitangent = cross(fs_Nor.xyz, tangent);
 
+    // Get four points around our point along the tangent and bitangent
+    float epsilon = 0.00001f;
+    vec3 p1 = modelposition.xyz + vec3(epsilon) * tangent;
+    vec3 p2 = modelposition.xyz - vec3(epsilon) * tangent;
+    vec3 p3 = modelposition.xyz + vec3(epsilon) * bitangent;
+    vec3 p4 = modelposition.xyz - vec3(epsilon) * bitangent;
 
-    fs_Pos = vs_Pos;
+    // Get the new positions of the points
+    vec3 p5 = noisePosition(p1);
+    vec3 p6 = noisePosition(p2);
+    vec3 p7 = noisePosition(p3);
+    vec3 p8 = noisePosition(p4);
+
+    // Calculate the new normal and set fs_Nor
+    vec3 newNorm = cross(normalize(p5 - p6), normalize(p7 - p8));
+    fs_Nor = vec4(newNorm, 0);
+    // NORMAL CALCULATIONS END //
 }

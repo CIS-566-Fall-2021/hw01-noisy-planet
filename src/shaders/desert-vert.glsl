@@ -194,6 +194,26 @@ vec4 when_le(vec4 x, vec4 y) {
   return 1.0 - when_gt(x, y);
 }
 
+vec3 noisePosition(vec3 p) {
+  vec3 noiseInput = p.xyz;
+  noiseInput *= 2.f;
+
+  // Animation!
+  noiseInput += float(u_Time) * 0.001;
+
+  vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
+
+  float noiseScale = noise.r;
+  float timeScale = cubicPulse(0.f, 5.f, cos(float(u_Time) * 0.01) * 2.f);
+
+  noiseScale = 1.1f * perlin((p.xyz + timeScale) * 10.f) * when_lt(noise.r, 0.5f) +
+                noise.r * when_ge(noise.r, 0.5f);
+                
+  vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
+  vec3 noisyModelPosition = p.xyz + offsetAmount;
+  return noisyModelPosition;
+}
+
 void main()
 {
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
@@ -236,6 +256,18 @@ void main()
 
     // END TINKERING
 
+    // BEGIN CALCULATING NORMAL
+    vec3 tangent = cross(vec3(0.f, 1.f, 0.f), fs_Nor.xyz);
+    vec3 bitangent = cross(fs_Nor.xyz, tangent);
+    float alpha = 0.000001f;
+    vec3 point = modelposition.xyz + alpha * tangent;
+    vec3 point2 = modelposition.xyz + alpha * bitangent;
+    vec3 p1 = noisePosition(point);
+    vec3 p2 = noisePosition(point2);
+    vec3 p3 = noisePosition(modelposition.xyz);
+    vec3 norm = cross(p3 - p1, p3 - p2);
+    fs_Nor = vec4(norm, 0);
+    // END CALCULATING NORMAL
 
     fs_Pos = vs_Pos;
 }

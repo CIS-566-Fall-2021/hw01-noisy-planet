@@ -143,6 +143,29 @@ float gain(float time, float gain) {
     }
 }
 
+vec3 noisePosition(vec3 p) {
+    vec3 noiseInput = p.xyz;
+    noiseInput *= 3.f;
+
+    // Animation!
+    //noiseInput += float(u_Time) * 0.001;
+
+    vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
+
+    float noiseScale = noise.r;
+    if (noise.r > 0.5f) {
+        noiseScale *= 1.1f;
+    }
+    if (noise.r < 0.4f) {
+        noiseInput += float(u_Time) * 0.001;
+        noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
+        noiseScale = noise.r / 2.f;
+    }
+    vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
+    vec3 noisyModelPosition = p.xyz + offsetAmount;
+    return noisyModelPosition;
+}
+
 // Cosine palette variables
 const vec3 a = vec3(0.5, 0.5, 0.5);
 const vec3 b = vec3(0.5, 0.5, 0.5);
@@ -178,7 +201,7 @@ void main()
     noiseInput *= 3.f;
 
     // Animation!
-    //noiseInput += float(u_Time) * 0.001;
+    noiseInput += float(u_Time) * 0.001;
 
     vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 
@@ -197,7 +220,28 @@ void main()
     gl_Position = u_ViewProj * vec4(noisyModelPosition, 1.0);
 
     // END TINKERING
+    // NORMAL CALCULATIONS //
+    // Get tangent and bitangent
+    vec3 tangent = cross(vec3(0.f, 1.f, 0.f), fs_Nor.xyz);
+    vec3 bitangent = cross(fs_Nor.xyz, tangent);
 
+    // Get four points around our point along the tangent and bitangent
+    float epsilon = 0.00001f;
+    vec3 p1 = modelposition.xyz + vec3(epsilon) * tangent;
+    vec3 p2 = modelposition.xyz - vec3(epsilon) * tangent;
+    vec3 p3 = modelposition.xyz + vec3(epsilon) * bitangent;
+    vec3 p4 = modelposition.xyz - vec3(epsilon) * bitangent;
+
+    // Get the new positions of the points
+    vec3 p5 = noisePosition(p1);
+    vec3 p6 = noisePosition(p2);
+    vec3 p7 = noisePosition(p3);
+    vec3 p8 = noisePosition(p4);
+
+    // Calculate the new normal and set fs_Nor
+    vec3 newNorm = cross(normalize(p5 - p6), normalize(p7 - p8));
+    fs_Nor = vec4(newNorm, 0);
+    // NORMAL CALCULATIONS END //
 
     fs_Pos = vs_Pos;
 }

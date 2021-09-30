@@ -130,6 +130,8 @@ function main() {
       }
     }
 
+    currShader.setCamera(vec4.fromValues(camera.getEye()[0], camera.getEye()[1], camera.getEye()[2], 1.0));
+
     let col = vec4.fromValues(controls.Color[0] / 255,
                               controls.Color[1] / 255,
                               controls.Color[2] / 255, 1);
