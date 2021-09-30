@@ -14,6 +14,8 @@ precision highp float;
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 
 uniform highp int u_Time;
+uniform highp float u_NoiseInput;
+uniform highp float u_AnimationSpeed;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -191,10 +193,10 @@ void main()
 
         vec3 noiseInput = fs_Pos.xyz;
         // Adjust this to change continent size
-        noiseInput *= 2.f;
+        noiseInput *= 2.f * u_NoiseInput;
 
         // Animation!
-        noiseInput += float(u_Time) * 0.001;
+        noiseInput += float(u_Time) * 0.001 * u_AnimationSpeed;
 
         vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 

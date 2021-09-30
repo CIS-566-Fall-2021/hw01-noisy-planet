@@ -31,6 +31,11 @@ class ShaderProgram {
   unifColor: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
   unifCamera: WebGLUniformLocation;
+  unifNoiseInput: WebGLUniformLocation;
+  unifAnimationSpeed: WebGLUniformLocation;
+  unifRotationAngleX: WebGLUniformLocation;
+  unifRotationAngleY: WebGLUniformLocation;
+  unifRotationAngleZ: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -52,6 +57,11 @@ class ShaderProgram {
     this.unifColor = gl.getUniformLocation(this.prog, "u_Color");
     this.unifTime = gl.getUniformLocation(this.prog, "u_Time");
     this.unifCamera = gl.getUniformLocation(this.prog, "u_Camera");
+    this.unifNoiseInput = gl.getUniformLocation(this.prog, "u_NoiseInput");
+    this.unifAnimationSpeed = gl.getUniformLocation(this.prog, "u_AnimationSpeed");
+    this.unifRotationAngleX = gl.getUniformLocation(this.prog, "u_RotationAngleX");
+    this.unifRotationAngleY = gl.getUniformLocation(this.prog, "u_RotationAngleY");
+    this.unifRotationAngleZ = gl.getUniformLocation(this.prog, "u_RotationAngleZ");
   }
 
   use() {
@@ -93,6 +103,41 @@ class ShaderProgram {
     this.use();
     if (this.unifCamera !== -1) {
       gl.uniform4fv(this.unifCamera, camera);
+    }
+  }
+
+  setNoiseInput(num: number) {
+    this.use();
+    if (this.unifNoiseInput !== -1) {
+      gl.uniform1f(this.unifNoiseInput, num);
+    }
+  }
+
+  setAnimationSpeed(speed: number) {
+    this.use();
+    if (this.unifAnimationSpeed !== -1) {
+      gl.uniform1f(this.unifAnimationSpeed, speed);
+    }
+  }
+
+  setRotationAngleX(angle: number) {
+    this.use();
+    if (this.unifRotationAngleX !== -1) {
+      gl.uniform1f(this.unifRotationAngleX, angle);
+    }
+  }
+
+  setRotationAngleY(angle: number) {
+    this.use();
+    if (this.unifRotationAngleY !== -1) {
+      gl.uniform1f(this.unifRotationAngleY, angle);
+    }
+  }
+
+  setRotationAngleZ(angle: number) {
+    this.use();
+    if (this.unifRotationAngleZ !== -1) {
+      gl.uniform1f(this.unifRotationAngleZ, angle);
     }
   }
 

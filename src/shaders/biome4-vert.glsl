@@ -20,6 +20,8 @@ uniform mat4 u_ViewProj;    // The matrix that defines the camera's transformati
                             // but in HW3 you'll have to generate one yourself
 
 uniform highp int u_Time;
+uniform highp float u_NoiseInput;
+uniform highp float u_AnimationSpeed;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
@@ -177,9 +179,31 @@ vec4 when_le(vec4 x, vec4 y) {
   return 1.0 - when_gt(x, y);
 }
 
+vec3 noisePosition(vec3 p) {
+    vec3 noiseInput = p.xyz;
+    noiseInput *= 2.f * perlin(fbm(p.x / 3.f, p.y / 5.f, p.z / 5.f) * 5.f) * u_NoiseInput;
+
+    // Animation!
+    noiseInput += float(u_Time) * 0.001 * u_AnimationSpeed;
+
+    vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
+
+    float noiseScale = noise.r;
+    // if (noise.r > 0.65f) {
+    //     noiseScale *= 1.1f;
+    // }
+    if (noise.r < 0.5f) {
+        noiseScale = 0.3f + 0.2f * noise.r;
+    }
+    vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
+    vec3 noisyModelPosition = p.xyz + offsetAmount;
+    return noisyModelPosition;
+}
+
 void main()
 {
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
+    fs_Pos = vs_Pos;
 
     mat3 invTranspose = mat3(u_ModelInvTr);
     fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);          // Pass the vertex normals to the fragment shader for interpolation.
@@ -198,28 +222,31 @@ void main()
 
     // BEGIN TINKERING
 
-    vec3 noiseInput = modelposition.xyz;
-    noiseInput *= 2.f * perlin(fbm(modelposition.x / 3.f, modelposition.y / 5.f, modelposition.z / 5.f) * 5.f);
-
-    // Animation!
-    //noiseInput += float(u_Time) * 0.001;
-
-    vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
-
-    float noiseScale = noise.r;
-    // if (noise.r > 0.65f) {
-    //     noiseScale *= 1.1f;
-    // }
-    if (noise.r < 0.5f) {
-        noiseScale = 0.3f + 0.2f * noise.r;
-    }
-    vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
-    vec3 noisyModelPosition = modelposition.xyz + offsetAmount;
-
+    vec3 noisyModelPosition = noisePosition(modelposition.xyz);
     gl_Position = u_ViewProj * vec4(noisyModelPosition, 1.0);
 
     // END TINKERING
 
+    // NORMAL CALCULATIONS //
+    // Get tangent and bitangent
+    vec3 tangent = cross(vec3(0.f, 1.f, 0.f), vs_Nor.xyz);
+    vec3 bitangent = cross(vs_Nor.xyz, tangent);
 
-    fs_Pos = vs_Pos;
+    // Get four points around our point along the tangent and bitangent
+    float epsilon = 0.00001f;
+    vec3 p1 = modelposition.xyz + vec3(epsilon) * tangent;
+    vec3 p2 = modelposition.xyz - vec3(epsilon) * tangent;
+    vec3 p3 = modelposition.xyz + vec3(epsilon) * bitangent;
+    vec3 p4 = modelposition.xyz - vec3(epsilon) * bitangent;
+
+    // Get the new positions of the points
+    vec3 p5 = noisePosition(p1);
+    vec3 p6 = noisePosition(p2);
+    vec3 p7 = noisePosition(p3);
+    vec3 p8 = noisePosition(p4);
+
+    // Calculate the new normal and set fs_Nor
+    vec3 newNorm = cross(normalize(p5 - p6), normalize(p7 - p8));
+    fs_Nor = vec4(invTranspose * newNorm, 0);
+    // NORMAL CALCULATIONS END //
 }

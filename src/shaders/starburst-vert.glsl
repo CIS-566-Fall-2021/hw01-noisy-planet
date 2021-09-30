@@ -20,6 +20,8 @@ uniform mat4 u_ViewProj;    // The matrix that defines the camera's transformati
                             // but in HW3 you'll have to generate one yourself
 
 uniform highp int u_Time;
+uniform highp float u_NoiseInput;
+uniform highp float u_AnimationSpeed;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
@@ -196,15 +198,15 @@ vec4 when_le(vec4 x, vec4 y) {
 
 vec3 noisePosition(vec3 p) {
   vec3 noiseInput = p.xyz;
-  noiseInput *= 2.f;
+  noiseInput *= 2.f * u_NoiseInput;
 
   // Animation!
-  noiseInput += float(u_Time) * 0.001;
+  noiseInput += float(u_Time) * 0.001 * u_AnimationSpeed;
 
   vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 
   float noiseScale = noise.r;
-  float timeScale = cubicPulse(0.f, 5.f, cos(float(u_Time) * 0.01) * 2.f);
+  float timeScale = cubicPulse(0.f, 5.f, cos(float(u_Time) * 0.01 * u_AnimationSpeed) * 2.f);
 
   noiseScale = 1.1f * perlin((p.xyz + timeScale) * 10.f) * when_lt(noise.r, 0.5f) +
                 noise.r * when_ge(noise.r, 0.5f);

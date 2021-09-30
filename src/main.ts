@@ -15,7 +15,12 @@ const controls = {
   tesselations: 5,
   'Load Scene': loadScene, // A function pointer, essentially
   Color: [255, 0, 0],
-  Shader: 1,
+  Planet: 1,
+  MultiplyNoiseInput: 1,
+  AnimationSpeed: 0,
+  RotateLightX: 0,
+  RotateLightY: 0,
+  RotateLightZ: 0,
 };
 
 let icosphere: Icosphere;
@@ -25,6 +30,11 @@ let prevTesselations: number = 5;
 let time: number = 0;
 let prevShader: number = 1;
 let currShader: ShaderProgram;
+let prevNoiseInput: number = 0.1;
+let prevAnimationSpeed: number = 0;
+let prevRotationX: number = 0;
+let prevRotationY: number = 0;
+let prevRotationZ: number = 0;
 
 function loadScene() {
   icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
@@ -33,6 +43,7 @@ function loadScene() {
   square.create();
   cube = new Cube(vec3.fromValues(0, 0, 0));
   cube.create();
+  controls.MultiplyNoiseInput = 1;
 }
 
 function main() {
@@ -48,8 +59,13 @@ function main() {
   const gui = new DAT.GUI();
   gui.add(controls, 'tesselations', 0, 8).step(1);
   gui.add(controls, 'Load Scene');
-  gui.addColor(controls, 'Color').onChange(updateColor);
-  gui.add(controls, 'Shader', 0, 4).step(1);
+  //gui.addColor(controls, 'Color').onChange(updateColor);
+  gui.add(controls, 'Planet', 1, 4).step(1);
+  gui.add(controls, 'MultiplyNoiseInput', 0.1, 5).step(0.1);
+  gui.add(controls, 'AnimationSpeed', 0, 10).step(0.1);
+  gui.add(controls, 'RotateLightX', 0, 360).step(1);
+  gui.add(controls, 'RotateLightY', 0, 360).step(1);
+  gui.add(controls, 'RotateLightZ', 0, 360).step(1);
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -67,7 +83,7 @@ function main() {
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
-  renderer.setClearColor(0.2, 0.2, 0.2, 1);
+  renderer.setClearColor(20 / 255, 19 / 255, 36 / 255, 1);
     gl.enable(gl.DEPTH_TEST);
 
   const lambert = new ShaderProgram([
@@ -117,17 +133,49 @@ function main() {
       cube.create();
     }
 
-    if (controls.Shader != prevShader) {
-      prevShader = controls.Shader;
-      if (controls.Shader == 1) {
+    if (controls.Planet != prevShader) {
+      prevShader = controls.Planet;
+      if (controls.Planet == 1) {
         currShader = lambert;
-      } else if (controls.Shader == 2) {
+      } else if (controls.Planet == 2) {
         currShader = lambertDeform;
-      } else if (controls.Shader == 3) {
+      } else if (controls.Planet == 3) {
         currShader = noise;
-      } else if (controls.Shader == 4) {
+      } else if (controls.Planet == 4) {
         currShader = noiseDeform;
       }
+      currShader.setNoiseInput(1);
+      currShader.setAnimationSpeed(controls.AnimationSpeed);
+    }
+
+    if(controls.MultiplyNoiseInput != prevNoiseInput)
+    {
+      prevNoiseInput = controls.MultiplyNoiseInput;
+      currShader.setNoiseInput(controls.MultiplyNoiseInput);
+    }
+
+    if(controls.AnimationSpeed != prevAnimationSpeed)
+    {
+      prevAnimationSpeed = controls.AnimationSpeed;
+      currShader.setAnimationSpeed(controls.AnimationSpeed);
+    }
+
+    if(controls.RotateLightX != prevRotationX)
+    {
+      prevRotationX = controls.RotateLightX;
+      currShader.setRotationAngleX(controls.RotateLightX);
+    }
+
+    if(controls.RotateLightY != prevRotationY)
+    {
+      prevRotationY = controls.RotateLightY;
+      currShader.setRotationAngleY(controls.RotateLightY);
+    }
+
+    if(controls.RotateLightZ != prevRotationZ)
+    {
+      prevRotationZ = controls.RotateLightZ;
+      currShader.setRotationAngleZ(controls.RotateLightZ);
     }
 
     currShader.setCamera(vec4.fromValues(camera.getEye()[0], camera.getEye()[1], camera.getEye()[2], 1.0));

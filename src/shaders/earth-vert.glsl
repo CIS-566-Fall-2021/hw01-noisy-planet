@@ -20,6 +20,11 @@ uniform mat4 u_ViewProj;    // The matrix that defines the camera's transformati
                             // but in HW3 you'll have to generate one yourself
 
 uniform highp int u_Time;
+uniform highp float u_NoiseInput;
+uniform highp float u_AnimationSpeed;
+uniform highp float u_RotationAngleX;
+uniform highp float u_RotationAngleY;
+uniform highp float u_RotationAngleZ;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
@@ -188,6 +193,31 @@ float worley(vec3 pos, vec3 scale, vec3 offset){
 }
 // NOISE FUNCITONS END //
 
+float degreesToRadians(float deg) {
+    return deg * 3.14159265359f / 180.f;
+}
+
+mat4 rotateX(float angle) {
+	return mat4(1, 0, 0, 0,
+			 	0, cos(angle), -sin(angle), 0,
+				0, sin(angle), cos(angle), 0,
+				0, 0, 0, 1);
+}
+
+mat4 rotateY(float angle) {
+	return mat4(cos(angle),	0, sin(angle), 0,
+			 	0, 1, 0, 0,
+				-sin(angle), 0, cos(angle), 0,
+				0, 0, 0, 1);
+}
+
+mat4 rotateZ(float angle) {
+	return mat4(cos(angle),	-sin(angle), 0, 0,
+			 	sin(angle), cos(angle), 0, 0,
+				0, 0, 1, 0,
+				0, 0, 0, 1);
+}
+
 float bias(float time, float bias) {
     return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
 }
@@ -249,14 +279,14 @@ vec4 when_le(vec4 x, vec4 y) {
 
 vec3 noisePosition(vec3 p) {
   vec3 noiseInput = p.xyz;
-  noiseInput *= 1.0f;
+  noiseInput *= 1.0f * u_NoiseInput;
 
   // Animation!
-  //noiseInput += float(u_Time) * 0.001;
+  noiseInput += float(u_Time) * 0.0005 * u_AnimationSpeed;
 
   vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
   float perlinNoise = 0.5f * abs(perlin(noiseInput * vec3(10.f)));
-  float worleyNoise = 0.1f * worley(noiseInput, vec3(8.f), vec3(0.f));
+  float worleyNoise = 0.1f * worley(noiseInput, vec3(4.f), vec3(0.f));
 
   //float timeScale = impulse(0.1f, cos(float(u_Time) * 0.01f) * 0.5f + 0.5f);
   //noiseInput += timeScale;
@@ -296,6 +326,10 @@ void main()
     vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
 
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
+    // Rotate light along x, y, and z axes based on user input
+    fs_LightVec = rotateX(degreesToRadians(u_RotationAngleX)) * 
+                  rotateY(degreesToRadians(u_RotationAngleY)) * 
+                  rotateZ(degreesToRadians(u_RotationAngleZ)) * fs_LightVec;
 
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is
                                              // used to render the final positions of the geometry's vertices
@@ -308,11 +342,11 @@ void main()
 
     // NORMAL CALCULATIONS //
     // Get tangent and bitangent
-    vec3 tangent = cross(vec3(0.f, 1.f, 0.f), fs_Nor.xyz);
-    vec3 bitangent = cross(fs_Nor.xyz, tangent);
+    vec3 tangent = cross(vec3(0.f, 1.f, 0.f), vs_Nor.xyz);
+    vec3 bitangent = cross(vs_Nor.xyz, tangent);
 
     // Get four points around our point along the tangent and bitangent
-    float epsilon = 0.0001f;
+    float epsilon = 0.00001f;
     vec3 p1 = modelposition.xyz + vec3(epsilon) * tangent;
     vec3 p2 = modelposition.xyz - vec3(epsilon) * tangent;
     vec3 p3 = modelposition.xyz + vec3(epsilon) * bitangent;
@@ -326,6 +360,6 @@ void main()
 
     // Calculate the new normal and set fs_Nor
     vec3 newNorm = cross(normalize(p5 - p6), normalize(p7 - p8));
-    fs_Nor = vec4(newNorm, 0);
+    fs_Nor = vec4(invTranspose * newNorm, 0);
     // NORMAL CALCULATIONS END //
 }

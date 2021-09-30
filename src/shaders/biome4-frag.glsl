@@ -14,6 +14,8 @@ precision highp float;
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 
 uniform highp int u_Time;
+uniform highp float u_NoiseInput;
+uniform highp float u_AnimationSpeed;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -187,56 +189,23 @@ void main()
                                                             //to simulate ambient lighting. This ensures that faces that are not
                                                             //lit by our point light are not completely black.
 
-        // Compute final shaded color
-        //out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
 
         // BEGIN TINKERING
 
         vec3 noiseInput = fs_Pos.xyz;
         // Adjust this to change continent size
-        noiseInput *= 2.f * perlin(fbm(fs_Pos.x / 3.f, fs_Pos.y / 5.f, fs_Pos.z / 5.f) * 5.f);
+        noiseInput *= 2.f * perlin(fbm(fs_Pos.x / 3.f, fs_Pos.y / 5.f, fs_Pos.z / 5.f) * 5.f) * u_NoiseInput;
 
         // Animation!
-        //noiseInput += float(u_Time) * 0.001;
+        noiseInput += float(u_Time) * 0.001 * u_AnimationSpeed;
 
         vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 
         vec3 surfaceColor = noise.rrr;
-
-        vec3 water = rgb(80.f, 80.f, 180.f);
-        vec3 grass = rgb(100.f, 200.f, 100.f);
-        vec3 mountain = rgb(100.f, 100.f, 100.f);
-        vec3 snow = rgb(220.f, 220.f, 220.f);
-
         float t = noise.r;
 
         t = gain(t, 0.02f);
-        float t2 = gain(noise.r, 0.1f);
-        float t4 = gain(noise.r, 0.6f);
-        float t5 = gain(noise.r, 0.2f);
-        float t6 = bias(noise.r, 0.8f);
 
-        vec3 waterGrass = mix(water, grass, t);
-        vec3 grassMountain = mix(grass, mountain, t6);
-        vec3 mountainSnow = mix(mountain, snow, t6);
-
-        vec3 combine1 = mix(waterGrass, grassMountain, t2);
-        vec3 combine2 = mix(grass, mountainSnow, t5);
-        vec3 combine3 = mix(combine1, combine2, t2);
-
-
-        /*
-        if (t > 0.93) {
-            surfaceColor = mountainSnow;
-        } else if (t > 0.9) {
-            surfaceColor = mix(mountainSnow, grassMountain, t);
-        } else if (t > 0.85) {
-            surfaceColor = grassMountain;
-        } else if (t > 0.8) {
-            surfaceColor = mix(grassMountain, waterGrass, t);
-        } else {
-            surfaceColor = waterGrass;
-        }*/
         vec3 noiseColor = cosinePalette(t);
         out_Col = vec4(noiseColor, diffuseColor.a);
 }

@@ -20,6 +20,11 @@ uniform mat4 u_ViewProj;    // The matrix that defines the camera's transformati
                             // but in HW3 you'll have to generate one yourself
 
 uniform highp int u_Time;
+uniform highp float u_NoiseInput;
+uniform highp float u_AnimationSpeed;
+uniform highp float u_RotationAngleX;
+uniform highp float u_RotationAngleY;
+uniform highp float u_RotationAngleZ;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
@@ -131,6 +136,31 @@ float perlin(vec3 p) {
 	return surfletSum;
 }
 
+float degreesToRadians(float deg) {
+    return deg * 3.14159265359f / 180.f;
+}
+
+mat4 rotateX(float angle) {
+	return mat4(1, 0, 0, 0,
+			 	0, cos(angle), -sin(angle), 0,
+				0, sin(angle), cos(angle), 0,
+				0, 0, 0, 1);
+}
+
+mat4 rotateY(float angle) {
+	return mat4(cos(angle),	0, sin(angle), 0,
+			 	0, 1, 0, 0,
+				-sin(angle), 0, cos(angle), 0,
+				0, 0, 0, 1);
+}
+
+mat4 rotateZ(float angle) {
+	return mat4(cos(angle),	-sin(angle), 0, 0,
+			 	sin(angle), cos(angle), 0, 0,
+				0, 0, 1, 0,
+				0, 0, 0, 1);
+}
+
 float bias(float time, float bias) {
     return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
 }
@@ -145,10 +175,10 @@ float gain(float time, float gain) {
 
 vec3 noisePosition(vec3 p) {
     vec3 noiseInput = p.xyz;
-    noiseInput *= 3.f;
+    noiseInput *= 3.f * u_NoiseInput;
 
     // Animation!
-    //noiseInput += float(u_Time) * 0.001;
+    noiseInput += float(u_Time) * 0.001 * u_AnimationSpeed;
 
     vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
 
@@ -157,7 +187,7 @@ vec3 noisePosition(vec3 p) {
         noiseScale *= 1.1f;
     }
     if (noise.r < 0.4f) {
-        noiseInput += float(u_Time) * 0.001;
+        noiseInput += float(u_Time) * 0.001 * u_AnimationSpeed;
         noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
         noiseScale = noise.r / 2.f;
     }
@@ -191,31 +221,16 @@ void main()
     vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
 
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
+    fs_LightVec = rotateX(degreesToRadians(u_RotationAngleX)) * 
+                  rotateY(degreesToRadians(u_RotationAngleY)) * 
+                  rotateZ(degreesToRadians(u_RotationAngleZ)) * fs_LightVec;
 
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is
                                              // used to render the final positions of the geometry's vertices
 
     // BEGIN TINKERING
 
-    vec3 noiseInput = modelposition.xyz;
-    noiseInput *= 3.f;
-
-    // Animation!
-    noiseInput += float(u_Time) * 0.001;
-
-    vec3 noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
-
-    float noiseScale = noise.r;
-    if (noise.r > 0.5f) {
-        noiseScale *= 1.1f;
-    }
-    if (noise.r < 0.4f) {
-        noiseInput += float(u_Time) * 0.001;
-        noise = fbm(noiseInput.x, noiseInput.y, noiseInput.z);
-        noiseScale = noise.r / 2.f;
-    }
-    vec3 offsetAmount = vec3(vs_Nor) * noiseScale;
-    vec3 noisyModelPosition = modelposition.xyz + offsetAmount;
+    vec3 noisyModelPosition = noisePosition(modelposition.xyz);
 
     gl_Position = u_ViewProj * vec4(noisyModelPosition, 1.0);
 
