@@ -16,6 +16,10 @@ https://thebookofshaders.com/12/ -referenced books of shaders when tweaking my n
 
 ![](images/planet2.png)
 
+![](images/planet3.png)
+
+![](images/plnaet4.png)
+
 
 
 
