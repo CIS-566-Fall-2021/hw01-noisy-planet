@@ -15,7 +15,7 @@
       - Above 50: Lava
   - <img height="360" src="img/HW01-Earth.png">
   - <img height="360" src="img/HW01-Lava Planet.png"> 
-- Live Demo Link: 
+- Live Demo Link: https://raykim1996.github.io/hw01-noisy-planet/
 
 ## Objective
 - Continue practicing WebGL and Typescript
