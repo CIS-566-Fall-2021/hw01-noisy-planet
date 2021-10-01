@@ -1,5 +1,22 @@
 # CIS 566 Project 1: Noisy Planets
 
+## Submitted Version
+- Name: Ray DongHo Kim
+- PennKey: kdongho
+- Features:
+  - Used FBM noise functions and toolbox functions, such as gain and smoothstep to generate multiple biomes
+  - Sliders:
+    - Moon Speed slider can modify the speed of moon's rotation around the planet
+    - Continent Number slider can modify the amount of continents of the planet
+    - Temparature slider changes the planet's biome based on the value
+      - Below 10: Arctic
+      - 10 ~ 30: Earth
+      - 30 ~ 50: Dessert
+      - Above 50: Lava
+  - <img height="360" src="img/HW01-Earth.png">
+  - <img height="360" src="img/HW01-Lava Planet.png"> 
+- Live Demo Link: https://raykim1996.github.io/hw01-noisy-planet/
+
 ## Objective
 - Continue practicing WebGL and Typescript
 - Experiment with noise functions to procedurally generate the surface of a planet
