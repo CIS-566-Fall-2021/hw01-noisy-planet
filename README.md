@@ -23,6 +23,7 @@ Surface Reflection: Blinn Phong and Lambertian
 
 ## Image:
 ![Noisy Planet](/finished.png)
+![Noisy Planet Night](/finishedNight.png)
 
 ## Objective
 - Continue practicing WebGL and Typescript
