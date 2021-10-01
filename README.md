@@ -4,6 +4,8 @@ Name: Eddie Huang
 
 PennKey: huanged
 
+Live Demo: Struggling
+
 Earth:
 ![](Earth.png)
 
