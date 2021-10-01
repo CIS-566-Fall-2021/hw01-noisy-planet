@@ -36,7 +36,6 @@ Starburst:
 
 I used FBM with some constant multipliers to create the general terrain and then to create the spikey inside I multiplied in Perlin Noise if a certain threshold was met. I then fed in the cosine of the time variable into a cubic pulse function to add animation. I once again used a cosine color palette add in the colors. I did not use any shading on this planet.
 
-
 ## Objective
 - Continue practicing WebGL and Typescript
 - Experiment with noise functions to procedurally generate the surface of a planet
