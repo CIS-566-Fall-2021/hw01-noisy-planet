@@ -10,11 +10,17 @@ https://www.shadertoy.com/view/ssXSzX https://www.shadertoy.com/view/sd2Gzd-my o
 
 https://thebookofshaders.com/12/ -referenced books of shaders when tweaking my noise
 
-//I currently do not have a link because my gh-pages is not updating
+I currently do not have a working link because my gh-pages is not updating. It only shows the original black square
+https://emmaholthouser16.github.io/hw01-noisy-planet/
+
 
 ![](images/planet1.png)
 
 ![](images/planet2.png)
+
+![](images/planet3.png)
+
+![](images/plnaet4.png)
 
 
 
