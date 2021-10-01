@@ -93,9 +93,9 @@ class Cube extends Drawable {
             1, -1, 1, 1,
             -1, -1, 1, 1]);
 
-        for (let i = 0; i < this.positions.length; i += 4) {
-            this.positions[i] -= 4;
-        }
+        // for (let i = 0; i < this.positions.length; i += 4) {
+        //     this.positions[i] -= 4;
+        // }
 
         this.generateIdx();
         this.generatePos();

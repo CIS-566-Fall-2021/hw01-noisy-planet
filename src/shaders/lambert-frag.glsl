@@ -89,6 +89,8 @@ void main() {
         diffuseColor = getBiomeColor(p, normal.xyz, mountain, forest, grass, biome);
     }
 
+    //diffuseColor = vec4(colorWheel1(perlin(p, 0.125, 1.f, 1.f)), 1.f);
+
     float diffuseTerm = dot(normalize(normal), normalize(lightSource));
     diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);
     float ambientTerm = 0.2;

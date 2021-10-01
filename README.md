@@ -1,5 +1,10 @@
 # CIS 566 Project 1: Noisy Planets
 
+## POST-SUBMISSION NOTE
+As I posted on Piazza, I ran into a hardware-specific bug where I was getting floating point precision errors in my perlin implementation. It seems that some float values were not aligning for my perlin noise lattice, leading to discontinuities in the perlin noise. This was also causing NaNs (for some reason?) with the tan function in the paltry "golden ratio" noise function I yoinked from StackOverflow. I'm still not 100% sure of the cause, but hardware specific floating point implementation/precision seems to be the root culprit. I'm wondering if because my MacBook has a higher DPI display that it's graphics hardware handles floats at a higher precision than my PC (even though my PC's graphics hardware is supposedly superior).
+
+I am hoping to look a little more into what happened, but I may not have time.
+
 ## Submission Details
 Name: Nathaniel Korzekwa
 PennKey: korzekwa
