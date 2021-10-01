@@ -1,5 +1,31 @@
 # CIS 566 Project 1: Noisy Planets
 
+Di Lu 
+
+dlu36
+
+
+## link: [Noisy Planet](https://dluisnothere.github.io/hw-01-noisy-planet)
+
+
+## References:
+
+Much help from Rachel, Ruth, Serena, Nathaniel D. and Nathaniel K!
+
+
+## Features:
+
+Biomes: Translucent Mountain Lands, Oceans, noisy deep oceans, and pink dotty lands
+
+Toolbox functions: Bias, Gain, Wave Function, Lerp/mixing, custom cosine color palettes
+
+Surface Reflection: Blinn Phong and Lambertian
+
+## Image:
+![Noisy Planet](/finished.png)
+![Noisy Planet Night](/finishedNight.png)
+![Noisy Planet Blinn Phong](/finishedBlinn.png)
+
 ## Objective
 - Continue practicing WebGL and Typescript
 - Experiment with noise functions to procedurally generate the surface of a planet
