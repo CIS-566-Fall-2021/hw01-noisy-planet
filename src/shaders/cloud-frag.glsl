@@ -13,6 +13,9 @@ precision highp float;
 
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 uniform highp int u_Time;
+uniform mat4 u_Model;
+
+uniform vec4 u_Camera;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -24,12 +27,11 @@ in vec4 fs_Pos;
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
 
+//FBM NOISE FIRST VARIANT
 float random3D(vec3 p) {
-    return cos(float(u_Time) * 0.005) * sin(length(vec3(
-                            dot(p, vec3(126.1, 316.8, 106.2)), 
-                            dot(p, vec3(266.5, 186.3, 206.4)),
-                            dot(p, vec3(166.4, 246.2, 126.5))
-                          ) * 0.01 ));
+    return sin(length(vec3(fract(dot(p, vec3(161.1, 121.8, 160.2))), 
+                            fract(dot(p, vec3(120.5, 161.3, 160.4))),
+                            fract(dot(p, vec3(161.4, 161.2, 122.5))))) * 435.90906);
 }
 
 float interpolateNoise3D(float x, float y, float z)
@@ -45,6 +47,7 @@ float interpolateNoise3D(float x, float y, float z)
     float v2 = random3D(vec3(intX + 1, intY, intZ));
     float v3 = random3D(vec3(intX, intY + 1, intZ));
     float v4 = random3D(vec3(intX + 1, intY + 1, intZ));
+
     float v5 = random3D(vec3(intX, intY, intZ + 1));
     float v6 = random3D(vec3(intX + 1, intY, intZ + 1));
     float v7 = random3D(vec3(intX, intY + 1, intZ + 1));
@@ -52,51 +55,52 @@ float interpolateNoise3D(float x, float y, float z)
 
 
     float i1 = mix(v1, v2, fractX);
-    float i2 = mix(v3, v4, fractY);
-    float i3 = mix(v5, v6, fractY);
-    float i4 = mix(v7, v8, fractZ);
-    float i5 = mix(v1, v3, fractZ);
-    float i6 = mix(v2, v4, fractX);
-    float i7 = mix(v5, v7, fractZ);
-    float i8 = mix(v6, v8, fractX);
+    float i2 = mix(v3, v4, fractX);
 
-    float mix1 = mix(mix(i1, i2, fractZ), mix(i3, i4, fractX), fractY);
-    float mix2 = mix(mix(i5, i6, fractX), mix(i7, i8, fractY), fractZ);
-    float finalMix = mix(mix1, mix2, fractX);
-    return finalMix;
+    //mix between i1 and i2
+    float i3 = mix(i1, i2, fractY);
+
+    float i4 = mix(v5, v6, fractX);
+    float i5 = mix(v7, v8, fractX);
+
+    //mix between i3 and i4
+    float i6 = mix(i4, i5, fractY);
+
+    //mix between i3 and i6
+    float i7 = mix(i3, i6, fractZ);
+
+    return i7;
 }
 
-float fbmNoise(float x, float y, float z)
+float fbmNoise(vec3 v)
 {
     float total = 0.0;
     float persistence = 0.5;
-    float frequency = 1.0;
+    float frequency = 3.0;
     float amplitude = 2.0;
-    int octaves = 5;
+    int octaves = 3;
 
     for (int i = 1; i <= octaves; i++) {
-        total += amplitude * interpolateNoise3D(frequency * x, frequency * y, frequency * z);
-        frequency *= 3.0;
+        total += amplitude * interpolateNoise3D(frequency * v.x, frequency * v.y, frequency * v.z);
+        frequency *= 3.6;
         amplitude *= persistence;
     }
     return total;
 }
 
+float getAnimation() {
+    return sin(float(u_Time) * 0.001) * 0.7;
+}
+
 void main()
 {
-    float noiseValue = fbmNoise(fs_Pos.x, fs_Pos.y, fs_Pos.z);
-
-    vec4 a = vec4(0.5, 0.5, 0.5, 1.0);
-    vec4 b = vec4(0.5, 0.5, 0.5, 1.0);
-    vec4 c = vec4(2.0, 1.0, 0.0, 1.0);
-    vec4 d = vec4(0.5, 0.2, 0.25, 1.0);
-
-    vec4 diffuseColor = a + b * cos(6.3 * (c * noiseValue + u_Color + d));
+    // Material base color (before shading)
+    vec4 diffuseColor = vec4(1.0, 1.0, 1.0, 1.0);
 
     // Calculate the diffuse term for Lambert shading
     float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
     // Avoid negative lighting values
-    diffuseTerm = clamp(diffuseTerm, 0.3, 1.0);
+    diffuseTerm = clamp(diffuseTerm, 0.5, 1.0);
 
     float ambientTerm = 0.2;
 
@@ -104,8 +108,17 @@ void main()
                                                         //to simulate ambient lighting. This ensures that faces that are not
                                                         //lit by our point light are not completely black.
 
-    // Compute final shaded color
-    //out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
-    out_Col = vec4(1.0);
-}
+    //begin tinkering
 
+    vec3 noiseInput = vec3(fs_Pos);
+    noiseInput += getAnimation();
+
+    float cloudAlphaNoise = clamp(fbmNoise(noiseInput), 0.0, 0.5);
+
+    diffuseColor.a = cloudAlphaNoise;
+
+    
+    out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
+
+    
+}

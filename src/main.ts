@@ -94,6 +94,11 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/planet-frag.glsl')),
   ]);
 
+  const cloud = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/cloud-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/cloud-frag.glsl')),
+  ]);
+
   //planet.setModelView(camera.getPosition());
 
   var itemColor = vec4.fromValues(colorController.getValue()[0] / 255.0, colorController.getValue()[1] / 255.0,
@@ -106,6 +111,7 @@ function main() {
     //increment time ONLY FOR CUSTOM SHADER because others don't use it
     //custom.setTime(time);
     planet.setTime(time);
+    cloud.setTime(time);
     time++;
 
     colorController.onChange(color => {
@@ -127,6 +133,8 @@ function main() {
       //square,
       //cube
     ], itemColor);
+
+    renderer.render(camera, cloud, [icosphere], itemColor);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame
