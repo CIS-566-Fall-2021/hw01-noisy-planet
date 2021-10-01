@@ -13,7 +13,7 @@ Molten:
 Ice:
 ![](Ice.png)
 
-Startburst:
+Starburst:
 ![](Starburst.png)
 
 Project Description:
