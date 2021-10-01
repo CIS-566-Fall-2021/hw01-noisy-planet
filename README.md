@@ -11,7 +11,7 @@ My noisy planet has 5 distinct biomes: **ocean**, **shore**, **forest**, **mount
 obviously the top, snowy part of a mountain and then mountain itself, forest, etc...
 
 #### Toolbox functions
-- `smoothstep`: smoothstep function is used to smoothly blend the clor between 2 different biomes.
+- `smoothstep`: smoothstep function is used to smoothly blend the color between 2 different biomes.
 - `sin`: sin function is used to animate the terrain overtime, including 
   - the change of noise output
   - the height of the snow biome to mimic the changing of seasons
