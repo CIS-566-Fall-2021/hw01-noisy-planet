@@ -4,7 +4,7 @@ Name: Eddie Huang
 
 PennKey: huanged
 
-Live Demo: Struggling
+Live Demo: https://eddieh80.github.io/hw01-noisy-planet/
 
 Earth:
 ![](Earth.png)
