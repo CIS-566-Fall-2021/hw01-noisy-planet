@@ -1,5 +1,36 @@
 # CIS 566 Project 1: Noisy Planets
 
+## Results
+![Image1](https://github.com/QennyS/hw01-noisy-planet/blob/master/NoisyPlanet2.gif)  \
+Live link: https://qennys.github.io/Noisy-Planet/ \
+Name: Yilei Li PennKey: 47053708
+
+### Implementation details
+#### Biomes
+My noisy planet has 5 distinct biomes: **ocean**, **shore**, **forest**, **mountain** and **snow**. The basic idea is classifying biomes based on the height of noise result. I used fbm noise and also iq's warping technique in this case. The highest is 
+obviously the top, snowy part of a mountain and then mountain itself, forest, etc...
+
+#### Toolbox functions
+- `smoothstep`: smoothstep function is used to smoothly blend the color between 2 different biomes.
+- `sin`: sin function is used to animate the terrain overtime, including 
+  - the change of noise output
+  - the height of the snow biome to mimic the changing of seasons
+- `bias`: bias function is used to alter the playing curve of the animation of snow biome
+- `gain`: gain function is used to alter the playing curve of the animation of the noise output
+
+
+#### Controls
+- `Lambert`: toggle between Lambert and Bilnn-Phong shading mode
+- `Octaves`: change the number of octaves in the noise function used in terrain generation
+- `Frequency`: change the frequency of in the noise function used in terrain generation
+- `Bias`: add bias to the animation (0.5 as the linear playing rate)
+- `Height`: change the height of the terrain above ocean
+- `Speed`: change the speed of animation (0 as stationary)
+
+
+#### Sources
+- [iq's warping technique](https://www.iquilezles.org/www/articles/warp/warp.htm)
+
 ## Objective
 - Continue practicing WebGL and Typescript
 - Experiment with noise functions to procedurally generate the surface of a planet
