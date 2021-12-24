@@ -1,19 +1,15 @@
-uniform vec4 u_Color; // The color with which to render this instance of geometry.
+uniform vec4 u_Color;
 uniform vec3 u_CameraEye;
 uniform bool u_UseCameraLight;
 uniform bool u_ColorTerrain;
 
-// These are the interpolated values out of the rasterizer, so you can't know
-// their specific values without knowing the vertices that contributed to them
 in vec4 fs_Pos;
 in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
-out vec4 out_Col; // This is the final output color that you will see on your
-                  // screen for the pixel that is currently being processed.
+out vec4 out_Col;
 
 vec3 colorWheelTransition(float angle) {
-    // base is grass
     vec3 a = vec3(0.190, 0.590, 0.190);
     vec3 b = vec3(0.500, -0.002, 0.500);
     vec3 c = vec3(0.590, 0.690, 0.590);
@@ -21,22 +17,28 @@ vec3 colorWheelTransition(float angle) {
     return (a + b * cos(2.f * 3.14159 * (c * angle + d))) * 0.65f;
 }
 
-vec3 colorWheelTransition2(float angle) {
-    // base is grass
-    vec3 a = vec3(0.070, 0.468, 0.070);
-    vec3 b = vec3(0.500, -0.112, 0.500);
-    vec3 c = vec3(0.188, -0.252, 0.188);
-    vec3 d = vec3(0.938, 1.658, 0.938);
-    return (a + b * cos(2.f * 3.14159 * (c * angle + d))) * 0.75f;
-}
-
 vec3 colorWheelEarth(float angle) {
-    // base is grass
     vec3 a = vec3(0.500, 0.660, 0.298);
     vec3 b = vec3(0.328, -0.222, 0.548);
     vec3 c = vec3(0.528, -0.362, 0.468);
     vec3 d = vec3(0.438, -0.052, 0.498);
     return (a + b * cos(2.f * 3.14159 * (c * angle + d))) * 0.75f;
+}
+
+vec3 colorWheelForest(float angle) {
+    vec3 a = vec3(0.f, 0.35, 0.f);
+    vec3 b = vec3(0.f, 0.10, 0.f);
+    vec3 c = vec3(0, 4.f, 0);
+    vec3 d = vec3(0, 0.25, 0.75);
+    return a + b * cos(2.f * 3.14159 * (c * angle + d));
+}
+
+vec3 colorWheelWater(float angle) {
+    vec3 a = vec3(0.0, 0.2, 0.5);
+    vec3 b = vec3(0.05, 0.2, 0.25);
+    vec3 c = vec3(1, 1, 2);
+    vec3 d = vec3(0, 0.25, 0.75);
+    return a + b * cos(2.f * 3.14159 * (c * angle + d));
 }
 
 vec4 getBiomeColor(vec3 p, vec3 normal, float mountain, float forest, float grass, int biome) {
@@ -57,7 +59,7 @@ vec4 getBiomeColor(vec3 p, vec3 normal, float mountain, float forest, float gras
             return vec4(colorWheelTransition(bias(dot(v,v), 0.8f)), 1.f);
         }
 
-        float grass2 = getGrassMembership(p * 16.f);
+        float grass2 = getGrassMembership(p * 16.f).x;
         return vec4(colorWheelEarth(bias(grass2, bias(grass, 0.2f))), 1.f);
     }
 }
@@ -65,36 +67,38 @@ vec4 getBiomeColor(vec3 p, vec3 normal, float mountain, float forest, float gras
 void main() {
     vec3 p = fs_Pos.xyz;
     vec4 diffuseColor = vec4(0.5, 0.5, 0.5, 1.f);
-    vec4 lightSource;
+    vec3 lightDiff;
     if (u_UseCameraLight) {
-        lightSource = vec4(normalize(u_CameraEye - fs_Pos.xyz), 1.f);
+        lightDiff = normalize(u_CameraEye - fs_Pos.xyz);
     } else {
-        lightSource = fs_LightVec;
+        lightDiff = normalize(fs_LightVec.xyz - fs_Pos.xyz);
     }
 
-    vec4 normal = fs_Nor;
+    vec3 normal = fs_Nor.xyz;
     float mountain = 0.f, forest = 0.f, grass = 0.f;
     int biome = getBiome(p, mountain, forest, grass);
+    vec4 noise = terrainNoise(p);
+    vec3 p2 = deformTerrain(p, noise);
 
-    vec3 p2 = deformTerrain(p, biome);
-    if (biome == FOREST) {
-        normal = (vec4(transformNormal(fs_Pos.xyz, p2, normal.xyz, biome), 1.f) + normal) / 2.f;
-    } else if (u_SymmetricNorm) {
-        normal = vec4(transformNormalSymmetric(fs_Pos.xyz, p2, normal.xyz, biome), 1.f);
+    if (u_AnalyticNorm) {
+        normal = transformNormalAnalytic(fs_Pos.xyz, noise, normal);
     } else {
-        normal = vec4(transformNormal(fs_Pos.xyz, p2, normal.xyz, biome), 1.f);
+        normal = transformNormal(fs_Pos.xyz, p2, normal);
+    }
+
+    if (biome == FOREST) {
+        normal = (normal + fs_Nor.xyz) / 2.f;
     }
 
     if (u_ColorTerrain) {
-        diffuseColor = getBiomeColor(p, normal.xyz, mountain, forest, grass, biome);
+        diffuseColor = getBiomeColor(p, normal, mountain, forest, grass, biome);
     }
 
-    //diffuseColor = vec4(colorWheel1(perlin(p, 0.125, 1.f, 1.f)), 1.f);
-
-    float diffuseTerm = dot(normalize(normal), normalize(lightSource));
+    float diffuseTerm = dot(normal, lightDiff);
     diffuseTerm = clamp(diffuseTerm, 0.f, 1.f);
+
     float ambientTerm = 0.2;
     float lightIntensity = diffuseTerm + ambientTerm; 
-    float bf_highlight = max(pow(dot(normalize(normal), normalize(lightSource)), 12.f), 0.f);
+    float bf_highlight = max(pow(dot(normal, lightDiff), 12.f), 0.f);
     out_Col = vec4(diffuseColor.rgb * (lightIntensity + bf_highlight), diffuseColor.a);
 }

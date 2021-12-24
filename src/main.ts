@@ -24,7 +24,7 @@ const controls : IIndexable = {
   u_MountainSpacing: 0.005,
   u_DeformTerrain: true,
   u_ColorTerrain: true,
-  u_SymmetricNorm: false,
+  u_AnalyticNorm: true,
   u_NormDifferential: 0.001,
   u_MountainGrassCutoff: 0.01
 };

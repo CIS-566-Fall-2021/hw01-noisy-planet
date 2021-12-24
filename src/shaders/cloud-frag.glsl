@@ -25,7 +25,6 @@ void main() {
 
     float cloudCutoff = 0.7f;
     vec3 p = fs_Pos.xyz;
-    p.y += float(u_Time) / 400.f;
     p.z += float(u_Time) / 400.f;
     float cloud = fbmValueNoise(p,
         144.f,         

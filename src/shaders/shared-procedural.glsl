@@ -9,7 +9,7 @@ uniform float u_MountainCutoff;
 uniform float u_ForestCutoff;
 uniform float u_NormDifferential;
 uniform float u_MountainSpacing;
-uniform bool u_SymmetricNorm;
+uniform bool u_AnalyticNorm;
 uniform float u_MountainGrassCutoff;
 
 
@@ -37,6 +37,10 @@ float bias(float time, float bias) {
     return (time / ((((1.0 / bias) - 2.0) * (1.0 - time)) + 1.0));
 }
 
+float dbias(float t, float b) {
+    return -b*(b - 1.) / pow(b*(2.*t - 1.) - t + 1., 2.);
+}
+
 float gain(float time, float gain) {
     if (time < 0.5) {
         return bias(time * 2.0, gain) / 2.0;
@@ -45,21 +49,12 @@ float gain(float time, float gain) {
     }
 }
 
-vec3 normalizeNZ(vec3 v) {
-    if (v.x == 0.f && v.y == 0.f && v.z == 0.f) {
-        return v;
-    } else {
-        return v;//normalize(v);
-    }
-}
+vec3 getLatticeVector(vec3 p, float seed) {
+    float x = -1.f + 2.f * randomNoise2(p, 1201.f + seed);
+    float y = -1.f + 2.f * randomNoise2(p, 44402.f + seed);
+    float z = -1.f + 2.f * randomNoise2(p, 23103.f + seed);
 
-vec3 getLatticeVector(ivec3 p, float cutoff, float seed) {
-    vec3 p2 = vec3(float(p.x), float(p.y), float(p.z));
-    float x = -1.f + 2.f * randomNoise2(p2, 1201.f + seed);
-    float y = -1.f + 2.f * randomNoise2(p2, 44402.f + seed);
-    float z = -1.f + 2.f * randomNoise2(p2, 23103.f + seed);
-
-    return normalizeNZ(vec3(x, y, z));
+    return vec3(x, y, z);
 }
 
 float interpQuintic(float x, float a, float b) {
@@ -82,16 +77,6 @@ float interpQuintic3D(vec3 p, float bnl, float bnr, float bfr, float bfl, float 
     return interpQuintic(diff.x, l, r);
 }
 
-const ivec3 bnlv = ivec3(0, 0, 0);
-const ivec3 bnrv = ivec3(1, 0, 0);
-const ivec3 bfrv = ivec3(1, 0, 1);
-const ivec3 bflv = ivec3(0, 0, 1);
-
-const ivec3 tnlv = ivec3(0, 1, 0);
-const ivec3 tnrv = ivec3(1, 1, 0);
-const ivec3 tfrv = ivec3(1, 1, 1);
-const ivec3 tflv = ivec3(0, 1, 1);
-
 const vec3 bnlv2 = vec3(0.f, 0.f, 0.f);
 const vec3 bnrv2 = vec3(1.f, 0.f, 0.f);
 const vec3 bfrv2 = vec3(1.f, 0.f, 1.f);
@@ -102,50 +87,72 @@ const vec3 tfrv2 = vec3(1.f, 1.f, 1.f);
 const vec3 tflv2 = vec3(0.f, 1.f, 1.f);
 
 const float sqrt3 = 1.732050807568877;
-float perlin(vec3 p, float voxelSize, float nonZeroCutoff, float seed) {
-    p.x += 100.f;
-    p.y += 100.f;
-    p.z += 100.f;
-    p /= voxelSize;
+const float sqrt3d2 = 1.732050807568877 / 2.f;
+
+vec4 perlin(vec3 p, float seed) {
     vec3 lp2 = floor(p);
-    ivec3 lp = ivec3(floor(p.x), floor(p.y), floor(p.z));
+    vec3 w = fract(p);
+    vec3 u = w * w * w * (w * (w * 6.0 - 15.0) + 10.0);
+    vec3 du = 30.0 * w * w * (w * (w - 2.0) + 1.0);
 
-    vec3 bnl = getLatticeVector(lp + bnlv, nonZeroCutoff, seed);
-    vec3 bnr = getLatticeVector(lp + bnrv, nonZeroCutoff, seed);
-    vec3 bfr = getLatticeVector(lp + bfrv, nonZeroCutoff, seed);
-    vec3 bfl = getLatticeVector(lp + bflv, nonZeroCutoff, seed);
-    vec3 tnl = getLatticeVector(lp + tnlv, nonZeroCutoff, seed);
-    vec3 tnr = getLatticeVector(lp + tnrv, nonZeroCutoff, seed);
-    vec3 tfr = getLatticeVector(lp + tfrv, nonZeroCutoff, seed);
-    vec3 tfl = getLatticeVector(lp + tflv, nonZeroCutoff, seed);
+    vec3 bnl = getLatticeVector(lp2 + bnlv2, seed);
+    vec3 bnr = getLatticeVector(lp2 + bnrv2, seed);
+    vec3 bfr = getLatticeVector(lp2 + bfrv2, seed);
+    vec3 bfl = getLatticeVector(lp2 + bflv2, seed);
+    vec3 tnl = getLatticeVector(lp2 + tnlv2, seed);
+    vec3 tnr = getLatticeVector(lp2 + tnrv2, seed);
+    vec3 tfr = getLatticeVector(lp2 + tfrv2, seed);
+    vec3 tfl = getLatticeVector(lp2 + tflv2, seed);
 
-    float dotBnl = dot(normalizeNZ(p - lp2), bnl);
-    float dotBnr = dot(normalizeNZ(p - lp2 - bnrv2), bnr);
-    float dotBfr = dot(normalizeNZ(p - lp2 - bfrv2), bfr);
-    float dotBfl = dot(normalizeNZ(p - lp2 - bflv2), bfl);
+    float dotBnl = dot(w, bnl);
+    float dotBnr = dot(w - bnrv2, bnr);
+    float dotBfr = dot(w - bfrv2, bfr);
+    float dotBfl = dot(w - bflv2, bfl);
 
-    float dotTnl = dot(normalizeNZ(p - lp2 - tnlv2), tnl);
-    float dotTnr = dot(normalizeNZ(p - lp2 - tnrv2), tnr);
-    float dotTfr = dot(normalizeNZ(p - lp2 - tfrv2), tfr);
-    float dotTfl = dot(normalizeNZ(p - lp2 - tflv2), tfl);
+    float dotTnl = dot(w - tnlv2, tnl);
+    float dotTnr = dot(w - tnrv2, tnr);
+    float dotTfr = dot(w - tfrv2, tfr);
+    float dotTfl = dot(w - tflv2, tfl);
 
-    return (sqrt3/2.f + interpQuintic3D(p, dotBnl, dotBnr, dotBfr, dotBfl, dotTnl, dotTnr, dotTfr, dotTfl)) / sqrt3;
+    vec3 d = bnl +
+             u.x * (bnr - bnl) +
+             u.y * (tnl - bnl) +
+             u.z * (bfl - bnl) +
+             u.x * u.y * (bnl - bnr - tnl + tnr) +
+             u.y * u.z * (bnl - tnl - bfl + tfl) +
+             u.z * u.x * (bnl - bnr - bfl + bfr) +
+             u.x * u.y * u.z * (-bnl + bnr + tnl - tnr + bfl - bfr - tfl + tfr) +
+
+             du * (vec3(dotBnr - dotBnl, dotTnl - dotBnl, dotBfl - dotBnl) +
+                   u.yzx * vec3(dotBnl - dotBnr - dotTnl + dotTnr, dotBnl - dotTnl - dotBfl + dotTfl, dotBnl - dotBnr - dotBfl + dotBfr) + 
+                   u.zxy * vec3(dotBnl - dotBnr - dotBfl + dotBfr, dotBnl - dotBnr - dotTnl + dotTnr, dotBnl - dotTnl - dotBfl + dotTfl) + 
+                   u.yzx * u.zxy * (-dotBnl + dotBnr + dotTnl - dotTnr + dotBfl - dotBfr - dotTfl + dotTfr));
+
+    float bl = mix(dotBnl, dotBfl, u.z);
+    float br = mix(dotBnr, dotBfr, u.z);
+    float tl = mix(dotTnl, dotTfl, u.z);
+    float tr = mix(dotTnr, dotTfr, u.z);
+
+    float l = mix(bl, tl, u.y);
+    float r = mix(br, tr, u.y);
+
+    return vec4(sqrt3d2 + mix(l, r, u.x), d) / sqrt3;
 }
 
-float fbmPerlin(vec3 p,   // The point in 3D space to get perlin value for
-    float voxelSize,      // The size of each voxel in perlin lattice
-    float nonZeroCutoff,  // The chance that a given lattice vector is nonzero
+vec4 fbmPerlin(vec3 p,   // The point in 3D space to get perlin value for
     float seed,           // Seed for perlin noise.
     int rounds,           // # of rounds of frequency summation/reconstruction
     float ampDecay,       // Amplitude decay per 'octave'.
     float freqGain) {     // Frequency gain per 'octave'.
 
-    float acc = 0.f;
+    vec4 acc = vec4(0.);
     float amplitude = 1.f;
     float freq = 0.5f;
     float normC = 0.f;
     for (int round = 0; round < rounds; round++) {
-        acc += amplitude * perlin(p * freq, voxelSize, nonZeroCutoff, u_Seed + seed);
+        vec4 noise = amplitude * perlin(p * freq, u_Seed + seed);
+        noise.yzw *= freq;
+        acc += noise;
         normC += amplitude;
         amplitude *= ampDecay;
         freq *= freqGain;
@@ -160,7 +167,7 @@ float noise(vec3 x, float seed) {
 
     vec3 i = floor(x);
     vec3 f = fract(x);
- 
+
     // For performance, compute the base input to a 1D hash from the integer part of the argument and the 
     // incremental change to the 1D based on the 3D -> 1D wrapping
     float n = dot(i, step);
@@ -170,32 +177,6 @@ float noise(vec3 x, float seed) {
                    mix( hash(n + dot(step, vec3(0, 1, 0))), hash(n + dot(step, vec3(1, 1, 0))), u.x), u.y),
                mix(mix( hash(n + dot(step, vec3(0, 0, 1))), hash(n + dot(step, vec3(1, 0, 1))), u.x),
                    mix( hash(n + dot(step, vec3(0, 1, 1))), hash(n + dot(step, vec3(1, 1, 1))), u.x), u.y), u.z);
-}
-
-float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
-vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
-vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
-
-float noise2(vec3 p){
-    vec3 a = floor(p);
-    vec3 d = p - a;
-    d = d * d * (3.0 - 2.0 * d);
-
-    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
-    vec4 k1 = perm(b.xyxy);
-    vec4 k2 = perm(k1.xyxy + b.zzww);
-
-    vec4 c = k2 + a.zzzz;
-    vec4 k3 = perm(c);
-    vec4 k4 = perm(c + 1.0);
-
-    vec4 o1 = fract(k3 * (1.0 / 41.0));
-    vec4 o2 = fract(k4 * (1.0 / 41.0));
-
-    vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
-    vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
-
-    return o4.y * d.y + o4.x * (1.0 - d.y);
 }
 
 float fbmValueNoise(vec3 p,   // The point in 3D space to get perlin value for
@@ -218,68 +199,18 @@ float fbmValueNoise(vec3 p,   // The point in 3D space to get perlin value for
     return acc / normC;
 }
 
-float fbmValueNoise2(vec3 p,   // The point in 3D space to get perlin value for
-    float seed,               // Seed for the noise function.
-    int rounds,               // # of rounds of frequency summation/reconstruction
-    float ampDecay,           // Amplitude decay per 'octave'.
-    float freqGain) {         // Frequency gain per 'octave'.
-
-    float acc = 0.f;
-    float amplitude = 1.f;
-    float freq = 0.5f;
-    float normC = 0.f;
-    for (int round = 0; round < rounds; round++) {
-        acc += amplitude * noise2(p * freq);
-        normC += amplitude;
-        amplitude *= ampDecay;
-        freq *= freqGain;
-    }
-
-    return acc / normC;
-}
-
-vec3 colorWheel1(float angle) {
-    vec3 a = vec3(0.5, 0.5, 0.5);
-    vec3 b = vec3(0.5, 0.5, 0.1);
-    vec3 c = vec3(1, 1, 2);
-    vec3 d = vec3(0, 0.25, 0.75);
-    return a + b * cos(2.f * 3.14159 * (c * angle + d));
-}
-
-vec3 colorWheelForest(float angle) {
-    vec3 a = vec3(0.f, 0.35, 0.f);
-    vec3 b = vec3(0.f, 0.10, 0.f);
-    vec3 c = vec3(0, 4.f, 0);
-    vec3 d = vec3(0, 0.25, 0.75);
-    return a + b * cos(2.f * 3.14159 * (c * angle + d));
-}
-
-vec3 colorWheelGrass(float angle) {
-    vec3 a = vec3(0.f, 0.7, 0.f);
-    vec3 b = vec3(0.f, 0.2, 0.f);
-    vec3 c = vec3(0, 4.f, 0);
-    vec3 d = vec3(0, 0.25, 0.0);
-    return a + b * cos(2.f * 3.14159 * (c * angle + d));
-}
-
-vec3 colorWheelWater(float angle) {
-    vec3 a = vec3(0.0, 0.2, 0.5);
-    vec3 b = vec3(0.05, 0.2, 0.25);
-    vec3 c = vec3(1, 1, 2);
-    vec3 d = vec3(0, 0.25, 0.75);
-    return a + b * cos(2.f * 3.14159 * (c * angle + d));
-}
-
 float getMountainMembership(vec3 p) {
-    return fbmPerlin(p, 0.5f, 1.f, 24.f, 4, 0.6f, 2.f);
+    return fbmPerlin(p / 0.5f, 24.f, 4, 0.6f, 2.f).x;
 }
 
 float getForestMembership(vec3 p) {
-    return fbmPerlin(p, 0.5f, 1.f, 55.f, 3, 0.6f, 3.f);
+    return fbmPerlin(p / 0.5f, 55.f, 3, 0.6f, 3.f).x;
 }
 
-float getGrassMembership(vec3 p) {
-    return fbmPerlin(p * 2.5f, 0.5f, 1.f, 23.f, 4, 0.4f, 3.2f);
+vec4 getGrassMembership(vec3 p) {
+    vec4 noise = fbmPerlin(p * 5., 23.f, 4, 0.4f, 3.2f);
+    noise.yzw *= 5.f;
+    return noise;
 }
 
 const int WATER = 0;
@@ -294,8 +225,7 @@ int getBiome(
     out float forest,
     out float grass) {
 
-    mountain = getMountainMembership(p);
-    grass = getGrassMembership(p);
+    grass = getGrassMembership(p).x;
     forest = (grass + getForestMembership(p)) /  2.f;
 
     if (grass > u_MountainCutoff) {
@@ -310,141 +240,54 @@ int getBiome(
         }
 
         return GRASS;
-    } else {
-        return WATER;
     }
+
+    mountain = getMountainMembership(p);
 
     return WATER;
 }
 
-float getBaseTerrainHeight(vec3 p) {
-    //return bias(fbmPerlin(p, 0.5f, 0.2f, 11.f, 2, 0.6f, 3.f) / 3.5f, 0.2f);
-    return 0.f;
-}
-
-float getMountainTerrainHeight(vec3 p) {
-    return bias(fbmPerlin(p, 0.5f, 0.2f, 0.f, 5, 0.6f, 3.f) / 1.5f, 0.2f);
-}
-
 float getWaterNoise(vec3 p) {
-    return fbmPerlin(p, 0.5f, 0.2f, 999.f, 5, 0.6f, 3.f);
+    return fbmPerlin(p / 0.5f, 999.f, 5, 0.6f, 3.f).x;
 }
 
 float getCloudNoise(vec3 p) {
-    return fbmPerlin(p, 0.5f, 0.2f, 888.f, 8, 0.8,  1.5f);
+    return fbmPerlin(p / 0.5f, 888.f, 8, 0.8,  1.5f).x;
 }
 
-vec3 deformForGrassNormal(vec3 p) {
-    float mod = bias(fbmPerlin(p * 8.f, 0.5f, 0.2f, 69.f, 8, 0.6f, 3.f) / 1.5f, 0.1f);
+vec4 terrainNoise(vec3 p) {
+    vec4 grass = getGrassMembership(p);
+    float f = clamp((grass.x - u_GrassCutoff) / (1.f - u_GrassCutoff), 0.f, 10.f);
+    f = bias(f, 0.2f) * 0.5f;
+    vec3 grad = ceil(f) * 0.5 * dbias(f, 0.2) * (grass.yzw / (1.f - u_GrassCutoff));
+    return vec4(f, grad);
+}
+
+vec3 deformTerrain(vec3 p, vec4 noise) {
+    float mod = noise.x;
     return p * (1.f + mod);
 }
 
-vec3 deformForForestNormal(vec3 p) {
-    float mod = bias(fbmPerlin(p * 10.f, 0.5f, 0.2f, 70.f, 8, 0.6f, 3.f) / 1.5f, 0.5f);
-    return p * (1.f + mod);
-}
-
-float terrainNoise(vec3 p, int biome) {
-    float f = clamp((getGrassMembership(p) - u_GrassCutoff) / (1.f - u_GrassCutoff), 0.f, 1.f);
-    return bias(f, 0.2f) * 0.5f;;
-}
-
-vec3 deformTerrain(vec3 p, int biome) {
-    float mod = terrainNoise(p, biome);
-    return p * (1.f + mod);
-}
-
-vec3 transformNormalSymmetric(vec3 p, vec3 dp, vec3 normal, int biome) {
+vec3 transformNormalAnalytic(vec3 p, vec4 noise, vec3 normal) {
     vec3 tangent = normalize(cross(vec3(0.f, 1.f, 0.f), normal));
     vec3 bitangent = normalize(cross(tangent, normal));
-
-    vec3 dt = deformTerrain(p + u_NormDifferential * tangent, biome);
-    vec3 db = deformTerrain(p + u_NormDifferential * bitangent, biome);
-    vec3 dt2 = deformTerrain(p - u_NormDifferential * tangent, biome);
-    vec3 db2 = deformTerrain(p - u_NormDifferential * bitangent, biome);
-
-    return normalize(cross(db - db2, dt - dt2));
-}
-
-vec3 transformNormal(vec3 p, vec3 dp, vec3 normal, int biome) {
-    vec3 tangent = normalize(cross(vec3(0.f, 1.f, 0.f), normal));
-    vec3 bitangent = normalize(cross(tangent, normal));
-
-    vec3 dt = deformTerrain(p + u_NormDifferential * tangent, biome);
-    vec3 db = deformTerrain(p + u_NormDifferential * bitangent, biome);
-
+    float base = noise.x;
+    float ddt = base + u_NormDifferential * dot(tangent, noise.yzw);
+    float ddb = base + u_NormDifferential * dot(bitangent, noise.yzw);
+    vec3 dp = p * (1.f + base);
+    vec3 dt = (p + u_NormDifferential * tangent) * (1. + ddt);
+    vec3 db = (p + u_NormDifferential * bitangent) * (1. + ddb);
     return normalize(cross(dp - db, dp - dt));
 }
 
-vec3 transformNormalP(vec3 p, vec3 normal) {
+vec3 transformNormal(vec3 p, vec3 dp, vec3 normal) {
     vec3 tangent = normalize(cross(vec3(0.f, 1.f, 0.f), normal));
     vec3 bitangent = normalize(cross(tangent, normal));
 
-    vec3 dp = deformForGrassNormal(p);
-    vec3 dt = deformForGrassNormal(p + u_NormDifferential * tangent);
-    vec3 db = deformForGrassNormal(p + u_NormDifferential * bitangent);
-
-    return (normalize(cross(dp - db, dp - dt)) + normal) / 2.f;
-}
-
-vec3 transformNormalF(vec3 p, vec3 normal) {
-    vec3 tangent = normalize(cross(vec3(0.f, 1.f, 0.f), normal));
-    vec3 bitangent = normalize(cross(tangent, normal));
-
-    vec3 dp = deformForForestNormal(p);
-    vec3 dt = deformForForestNormal(p + u_NormDifferential * tangent);
-    vec3 db = deformForForestNormal(p + u_NormDifferential * bitangent);
+    vec3 pt = p + u_NormDifferential * tangent;
+    vec3 dt = deformTerrain(pt, terrainNoise(pt));
+    vec3 pb = p + u_NormDifferential * bitangent;
+    vec3 db = deformTerrain(pb, terrainNoise(pb));
 
     return normalize(cross(dp - db, dp - dt));
-}
-
-vec3 sph2Cart(float r, float theta, float phi) {
-    return vec3(
-        r * cos(theta) * sin(phi),
-        r * sin(theta) * sin(phi),
-        r * cos(phi));
-}
-
-vec3 transformNormalAdam(vec3 p, vec3 dp, vec3 normal, int biome) {
-    float r = length(p);
-    float theta = atan(p.y, p.x);
-    float phi = atan(length(p.xy), p.z);
-
-    vec3 dx1 = sph2Cart(r, theta + u_NormDifferential, phi);
-    vec3 dx2 = sph2Cart(r, theta - u_NormDifferential, phi);
-    vec3 dy1 = sph2Cart(r, theta, phi + u_NormDifferential);
-    vec3 dy2 = sph2Cart(r, theta, phi - u_NormDifferential);
-    //vec3 dz1 = sph2Cart(r + alpha, theta, phi);
-
-    float dx = (terrainNoise(dx1, biome) - terrainNoise(dx2, biome)) / u_NormDifferential;
-    float dy = (terrainNoise(dy1, biome) - terrainNoise(dy2, biome)) / u_NormDifferential;
-    dx = 1.f / (1.f + exp(-dx));
-    dy = 1.f / (1.f + exp(-dy));
-    //float dz = terrainNoise(dz1, biome) - terrainNoise(p, biome);
-    vec3 local = normalize(vec3(dx, dy, sqrt(1.f - dx*dx - dy*dy)));
-    vec3 tangent = normalize(cross(vec3(0.f, 1.f, 0.f), normal));
-    vec3 bitangent = normalize(cross(tangent, normal));
-    mat3 trans;
-    trans[0] = tangent;
-    trans[1] = bitangent;
-    trans[2] = normal;
-
-    return trans * local;
-}
-
-vec3 transformNormalAdamImproved(vec3 p, vec3 dp, vec3 normal, int biome) {
-    float r = length(p);
-    float theta = atan(p.y, p.x);
-    float phi = atan(length(p.xy), p.z);
-
-    vec3 dx1 = sph2Cart(r, theta + u_NormDifferential, phi);
-    vec3 dx2 = sph2Cart(r, theta - u_NormDifferential, phi);
-    vec3 dy1 = sph2Cart(r, theta, phi + u_NormDifferential);
-    vec3 dy2 = sph2Cart(r, theta, phi - u_NormDifferential);
-    //vec3 dz1 = sph2Cart(r + alpha, theta, phi);
-
-    vec3 dx = (deformTerrain(dx1, biome) - deformTerrain(dx2, biome));
-    vec3 dy = (deformTerrain(dy1, biome) - deformTerrain(dy2, biome));
-
-    return cross(dy, dx);
 }

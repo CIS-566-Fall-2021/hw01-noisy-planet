@@ -22,9 +22,7 @@ void main() {
     fs_Pos = vec4(p, 1.f);
 
     if (u_DeformTerrain) {
-        float mountain, forest, grass;
-        int biome = getBiome(p, mountain, forest, grass);
-        p = deformTerrain(p, biome);
+        p = deformTerrain(p, terrainNoise(p));
     }
 
     fs_Nor = vec4(invTranspose * normal, 0);
