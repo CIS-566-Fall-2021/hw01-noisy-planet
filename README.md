@@ -26,10 +26,10 @@ I used FBM to create the general terrain and then added in Perlin Noise to creat
 
 I used FBM with a higher scaled noise input to create the general terrain, and then spiked up the mountains by increasing the multiplier if a certain threshold was met and also decreased the multiplier and added animation if the noise value is below a certain threshold. I then fed in the same noise input into the fragment shader and used a cosine color palette to color in the terrain. I also used Blinn-Phong shading with a specular color that is tinted red to color the planet.
 
-###Ice:
+### Ice:
 
 I fed in FBM with some constant modifiers into Perlin Noise, and then multiplied that into the input to FBM once again to create the terrain. I also used a threshold to modify some constants in order to create the ocean. I then fed in the same noise input into the fragment shader and used a cosine color palette to color in the terrain. I did not use any shading on this planet.
 
-###Starburst:
+### Starburst:
 
 I used FBM with some constant multipliers to create the general terrain and then to create the spikey inside I multiplied in Perlin Noise if a certain threshold was met. I then fed in the cosine of the time variable into a cubic pulse function to add animation. I once again used a cosine color palette add in the colors. I did not use any shading on this planet.
