@@ -21,7 +21,7 @@ const controls =
   LightPosTheta: 0,
   LightPosDistance: 20,
   LightPosAzimuth: 90,
-  BPM: 100,
+  BPM: 0,
   AltitudeMultiplier: 1,
   TerrainSeed: 0
 };
